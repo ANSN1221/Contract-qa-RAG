@@ -12,10 +12,10 @@
 
 | 字段 | 规则 |
 | --- | --- |
-| `id` | Q01–Q30 |
+| `id` | Q01–Q50 |
 | `question` | 用真实用户口吻，不要照抄条款原文 |
 | `relevant_clause_ids` | 可多个；跨条款题填 2–3 个，命中任一即算召回成功；不可答题填 `[]` |
-| `category` | `fact`（事实，10 条）/ `cross`（跨条款，10 条）/ `unanswerable`（不可答，10 条） |
+| `category` | `fact`（事实，17 条）/ `cross`（跨条款，17 条）/ `unanswerable`（不可答，16 条） |
 
 ## 标注规则
 
