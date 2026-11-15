@@ -11,7 +11,7 @@
 {"id":"Q11","question":"这份合同编号是多少？","relevant_clause_ids":[],"category":"unanswerable"}
 {"id":"Q12","question":"合同签订日期是哪天？","relevant_clause_ids":[],"category":"unanswerable"}
 {"id":"Q13","question":"项目负责人的手机号是多少？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q14","question":"代理机构反腐倡廉监督电话是多少？","relevant_clause_ids":[],"category":"unanswerable"}
+{"id":"Q14","question":"代理机构反腐倡廉监督电话是多少？","relevant_clause_ids":["DOC003-C0011-5"],"category":"fact"}
 {"id":"Q15","question":"工程量清单包含哪些分项？","relevant_clause_ids":[],"category":"unanswerable"}
 {"id":"Q16","question":"验收的时候发现货物和合同对不上，甲方要在几天内提书面异议？","relevant_clause_ids":["DOC009-C0030"],"category":"fact"}
 {"id":"Q17","question":"测评开始前，乙方要提前几天通知甲方备份系统数据？","relevant_clause_ids":["DOC004-C0004-1"],"category":"fact"}
@@ -20,7 +20,7 @@
 {"id":"Q20","question":"地质大数据平台项目的评标委员会是几个人？","relevant_clause_ids":["DOC003-C0011-4"],"category":"fact"}
 {"id":"Q21","question":"潢川粮油项目一包的预算和最高限价是多少？","relevant_clause_ids":["DOC009-C0013-1","DOC009-C0021-1"],"category":"cross"}
 {"id":"Q22","question":"疫苗采购合同要履行多久？","relevant_clause_ids":["DOC005-C0002-4","DOC005-C0015-1"],"category":"cross"}
-{"id":"Q23","question":"指挥中心运维项目各个包的服务期限分别是几个月？","relevant_clause_ids":["DOC011-C0003-2","DOC011-C0011-1"],"category":"cross"}
+{"id":"Q23","question":"指挥中心运维项目各个包的服务期限分别是几个月？","relevant_clause_ids":["DOC011-C0003-2","DOC011-C0011-1","DOC011-C0011-2"],"category":"cross"}
 {"id":"Q24","question":"疫苗项目投标要交保证金吗？","relevant_clause_ids":["DOC005-C0009-6","DOC005-C0012-5"],"category":"cross"}
 {"id":"Q25","question":"OA 和信创终端的运维服务签到什么时候结束？","relevant_clause_ids":["DOC011-C0022-1","DOC011-C0023"],"category":"cross"}
 {"id":"Q26","question":"这个项目什么时候通过验收的？","relevant_clause_ids":[],"category":"unanswerable"}
@@ -34,7 +34,7 @@
 {"id":"Q34","question":"潢川那个项目一包的农药，一亩地用多少？","relevant_clause_ids":["DOC009-C0037"],"category":"fact"}
 {"id":"Q35","question":"指挥中心运维项目里，紧急故障多久要响应？","relevant_clause_ids":["DOC011-C0025-2"],"category":"fact"}
 {"id":"Q36","question":"售后技术支持的响应时间最长不能超过多久？","relevant_clause_ids":["DOC011-C0031-15"],"category":"fact"}
-{"id":"Q37","question":"网络监测预警设备的原厂维保从哪天开始？","relevant_clause_ids":["DOC011-C0027"],"category":"fact"}
+{"id":"Q37","question":"网络监测预警设备的原厂维保从哪天开始？","relevant_clause_ids":["DOC011-C0027","DOC011-C0024"],"category":"fact"}
 {"id":"Q38","question":"门头沟那个项目涉及几条公路、多少处隐患点？","relevant_clause_ids":["DOC010-C0001-1","DOC010-C0008"],"category":"cross"}
 {"id":"Q39","question":"监理合同的缺陷责任期是多长时间？","relevant_clause_ids":["DOC010-C0001-3","DOC012-C0001-3","DOC014-C0001-3"],"category":"cross"}
 {"id":"Q40","question":"监理项目要按什么比例配安全员？","relevant_clause_ids":["DOC012-C0007-3","DOC014-C0001-6"],"category":"cross"}

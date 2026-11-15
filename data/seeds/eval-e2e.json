@@ -1,0 +1,1223 @@
+{
+  "generated_at": "2026-11-15T23:53:46",
+  "rows": [
+    {
+      "id": "Q01",
+      "question": "设备总价款里包括哪些费用？",
+      "category": "fact",
+      "answer": "DOC002 的合同总价为人民币贰拾捌万伍仟陆佰元整（285600元），该合同金额包括全部货物及所需附件购置费、包装费、运输费、人工费、保险费、安装调试费、各种税费、资料费、售后服务费及完成项目应有的全部费用；乙方为履行本合同而发生的所有费用均应包含在合同价款中，甲方不再另行支付其它任何费用。此外，DOC002 还约定乙方承担合同标的供货、安装调试及交付前的一切费用（包括不可预见费用）和市场风险。",
+      "answerable": true,
+      "citations": [
+        "DOC002-C0002",
+        "DOC002-C0008"
+      ],
+      "expected": [
+        "DOC002-C0002"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 6.48,
+      "tokens": 3002,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q02",
+      "question": "设备出故障报修，维修人员多久要到现场？",
+      "category": "fact",
+      "answer": "不同文件对维修人员到场时限的约定不同：DOC002 第六条约定，维修人员接到维修电话后须在24小时内赶到现场，质保期内出现工艺异常、出水水质异常情况也应在24小时内赶到现场；DOC011 中，视频会议相关服务要求故障响应时间不超过30分钟，电话技术支持不能解决时技术人员到达现场时间不超过60分钟；另一处视频会议综合服务要求远程不能解决时派遣技术人员携带工具和备品备件在4小时内到达现场解决问题；7×24技术支持服务条款要求当日响应、响应时间不大于20分钟、到场时间不大于1小时；7×24小时服务条款要求紧急故障1小时内响应、非紧急故障4小时内响应。",
+      "answerable": true,
+      "citations": [
+        "DOC002-C0007-1",
+        "DOC011-C0031-5",
+        "DOC011-C0029-1",
+        "DOC011-C0031-15",
+        "DOC011-C0025-2"
+      ],
+      "expected": [
+        "DOC002-C0007-1"
+      ],
+      "verify_rounds": 2,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 8.33,
+      "tokens": 8292,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q03",
+      "question": "食品安全抽检的样品要在多少个工作日内检完？",
+      "category": "fact",
+      "answer": "样品检验周期确定为20个工作日，乙方应按规定的时限完成检验、信息填报。",
+      "answerable": true,
+      "citations": [
+        "DOC008-C0029-1"
+      ],
+      "expected": [
+        "DOC008-C0029-1"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.53,
+      "tokens": 3095,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q04",
+      "question": "合同签订后要在多少个工作日内完成供货安装？",
+      "category": "fact",
+      "answer": "所给条款中涉及供货安装期限的有两处：DOC002 项目约定，合同签订之日起60个工作日内完成供货并安装调试且取得第三方水质监测合格报告书，并向甲方提供产品合格证等相关的资料和配件；DOC009 的政府采购合同参考文本中，交货时间条款仅写「合同签订后日历天完成供货（具体日期由签订合同之日起计算）」，未填写具体天数。",
+      "answerable": true,
+      "citations": [
+        "DOC002-C0004",
+        "DOC009-C0026"
+      ],
+      "expected": [
+        "DOC002-C0004"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.29,
+      "tokens": 2407,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q05",
+      "question": "测评服务的合同期限到哪一天？",
+      "category": "fact",
+      "answer": "根据《DOC004》合同条款，本合同服务期限为自合同签订之日起至2025年11月30日，并须在2025年11月30日前完成网络安全等级保护测评、商用密码应用安全性评估。",
+      "answerable": true,
+      "citations": [
+        "DOC004-C0006"
+      ],
+      "expected": [
+        "DOC004-C0006"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.39,
+      "tokens": 2971,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q06",
+      "question": "货款是分几次结清的，每次付多少比例？",
+      "category": "cross",
+      "answer": "所给条款涉及多份不同合同，付款次数和比例各不相同：\n\n1. DOC003（第三章 价格与付款方式）：合同金额由甲方采用分期支付，分三次支付：合同签订后15个工作日内支付合同额的20%作为预付款；乙方完成项目全部内容并初步上线试运行、经甲方初步验收通过后15个工作日内支付合同额的60%；系统正式上线并经甲方验收合格后15个工作日内支付合同额的20%。\n\n2. DOC004（六、合同总价及付款方式）：合同总价为人民币118万元，分三次支付：合同签订生效后一个月内支付合同款的60%（70.8万元）；2025年第三季度支付合同款的20%（23.6万元）；项目完成并验收合格后支付项目尾款20%（23.6万元）。\n\n3. DOC002（第五条）：分三次支付：货到指定安装点安装完毕并经验收合格且经第三方水质检测机构检测合格后付合同价款的70%；设备使用6个月后（自验收合格之日起计算）无质量问题付至合同价款的95%；余款5%作为质量保证金在质保期（1年）满后的10个工作日内一次性付清（不计利息）。\n\n4. DOC008（七、费用结算办法）：乙方全部完成合同项下抽检任务，且不合格样品复检和异议处理完毕，经甲方组织考核通过后，一次性支付合同金额的100%。\n\n5. DOC009（八、支付和支付条件）：项目实施完成、经验收合格后，甲方一次性支付乙方至合同额一定比例的货款（条款中比例数字空缺）。",
+      "answerable": true,
+      "citations": [
+        "DOC003-C0031",
+        "DOC004-C0007-1",
+        "DOC002-C0006",
+        "DOC008-C0034",
+        "DOC009-C0031"
+      ],
+      "expected": [
+        "DOC002-C0006",
+        "DOC004-C0007-1"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 6.9,
+      "tokens": 4122,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q07",
+      "question": "乙方违约要按什么比例赔？",
+      "category": "cross",
+      "answer": "各文件对乙方违约的赔偿比例约定不同：DOC004约定，乙方违反第三条、第七条约定义务的，每人/每次按合同总金额的3%支付违约金，累计超过3次的，甲方有权解除合同并要求乙方支付合同总金额10%作为违约金；未经甲方书面同意转让合同权利义务的，按合同总价款10%支付违约金；乙方违反约定给甲方造成损失的，甲方有权解除合同，乙方还应支付合同总价款10%的违约金。DOC009约定，乙方未能如期提供服务的，每日按合同款项的千分之六支付违约金；因未能如期提供服务或因其他违约行为导致甲方解除合同的，支付合同总值5%的违约金。DOC002约定，乙方拒绝履行合同义务的，按合同总价款的5%承担违约金；货物验收不合格或验收后出现质量问题的，支付合同总价5%的违约金。DOC003、DOC011的片段中违约金比例处为空白或未明确具体比例。",
+      "answerable": true,
+      "citations": [
+        "DOC004-C0011-2",
+        "DOC004-C0009-3",
+        "DOC009-C0032",
+        "DOC002-C0009-1",
+        "DOC003-C0052",
+        "DOC011-C0017-1",
+        "DOC011-C0017-2"
+      ],
+      "expected": [
+        "DOC002-C0009-1",
+        "DOC004-C0011-1",
+        "DOC009-C0032"
+      ],
+      "verify_rounds": 2,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 10.34,
+      "tokens": 8432,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q08",
+      "question": "几个监理项目的服务期限各是多少天？",
+      "category": "cross",
+      "answer": "所给条款涉及三个监理项目，其监理服务期限分别为：\n1. DOC014 项目：监理服务期限 457 日历天，其中施工阶段（含施工准备阶段）监理 92 日历天，缺陷责任期阶段监理 365 日历天。\n2. DOC012 项目：监理服务期限 425 日历天，其中施工阶段（含施工准备阶段）监理 60 日历天，缺陷责任期阶段监理 365 日历天。\n3. DOC010 项目：监理服务期限 488 日历天，其中施工阶段（含施工准备阶段）监理 123 日历天，缺陷责任期阶段监理 365 日历天。",
+      "answerable": true,
+      "citations": [
+        "DOC014-C0001-3",
+        "DOC012-C0001-3",
+        "DOC010-C0001-3"
+      ],
+      "expected": [
+        "DOC010-C0001-3",
+        "DOC012-C0001-3",
+        "DOC014-C0001-3"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.66,
+      "tokens": 4304,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q09",
+      "question": "地质大数据平台项目的预算和最高限价是多少？",
+      "category": "cross",
+      "answer": "河南省地质局河南省地质大数据平台（2025）项目的预算金额为8510000.00元，最高限价同为8510000.00元；供应商须知前附表中亦载明项目预算金额为851万元。",
+      "answerable": true,
+      "citations": [
+        "DOC003-C0003-1",
+        "DOC003-C0011-1"
+      ],
+      "expected": [
+        "DOC003-C0003-1",
+        "DOC003-C0011-1",
+        "DOC003-C0011-2"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.74,
+      "tokens": 3897,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q10",
+      "question": "合同一共要签几份？",
+      "category": "cross",
+      "answer": "所给条款涉及多份不同文件，各自约定的合同份数不同：DOC002 项目合同一式六份，甲方、乙方各两份，安徽广振工程咨询有限公司一份，宁国市公共资源交易服务中心一份；DOC009 河南省政府采购合同参考文本约定一式六份，甲方执四份、乙方执二份；DOC011 合同主要条款约定一式四份，甲方、乙方各执两份；DOC005 投标文件通用格式中的合同条款约定一式伍份，需方执肆份、供方执壹份。",
+      "answerable": true,
+      "citations": [
+        "DOC002-C0014",
+        "DOC009-C0036",
+        "DOC011-C0020",
+        "DOC005-C0012-31"
+      ],
+      "expected": [
+        "DOC002-C0014",
+        "DOC009-C0036"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.65,
+      "tokens": 3160,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q11",
+      "question": "这份合同编号是多少？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.49,
+      "tokens": 1821,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q12",
+      "question": "合同签订日期是哪天？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.18,
+      "tokens": 1776,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q13",
+      "question": "项目负责人的手机号是多少？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.88,
+      "tokens": 2596,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q14",
+      "question": "代理机构反腐倡廉监督电话是多少？",
+      "category": "fact",
+      "answer": "根据所给条款，DOC003（河南招标采购服务有限公司相关招标文件）中列明的代理机构反腐倡廉监督电话为 0371—6596 2573，邮箱为 hnzbcggs2000@126.com。",
+      "answerable": true,
+      "citations": [
+        "DOC003-C0011-5"
+      ],
+      "expected": [
+        "DOC003-C0011-5"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.93,
+      "tokens": 3106,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q15",
+      "question": "工程量清单包含哪些分项？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.89,
+      "tokens": 2815,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q16",
+      "question": "验收的时候发现货物和合同对不上，甲方要在几天内提书面异议？",
+      "category": "fact",
+      "answer": "根据河南省政府采购合同（参考文本）的约定，甲方在验收中如发现货物与合同规定不符，应在3天内向乙方提出书面异议，不签发验收报告，并同时将该书面异议送达有关部门；甲方未按规定期限提出书面异议并且签发验收报告的，视为甲方放弃自己的权利。",
+      "answerable": true,
+      "citations": [
+        "DOC009-C0030"
+      ],
+      "expected": [
+        "DOC009-C0030"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.4,
+      "tokens": 2969,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q17",
+      "question": "测评开始前，乙方要提前几天通知甲方备份系统数据？",
+      "category": "fact",
+      "answer": "根据合同约定，乙方应在安全等级测评开展之前10日内，以书面形式通知甲方做好相应的系统数据备份等准备工作，并明示测试方法、采用的测试工具以及可能出现的风险。",
+      "answerable": true,
+      "citations": [
+        "DOC004-C0004-1"
+      ],
+      "expected": [
+        "DOC004-C0004-1"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.32,
+      "tokens": 3186,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q18",
+      "question": "平谷那个地质灾害防治工程有多少处隐患点要治理？",
+      "category": "fact",
+      "answer": "2024年平谷区普通公路沿线地质灾害防治工程涉及平谷区熊南路62处地质灾害隐患点的治理，设计范围里程为K3+800~K22+400，最终实施规模以批复为准。",
+      "answerable": true,
+      "citations": [
+        "DOC012-C0001-1"
+      ],
+      "expected": [
+        "DOC012-C0001-1"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.6,
+      "tokens": 3363,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q19",
+      "question": "怀柔项目的监理计划从哪天开始？",
+      "category": "fact",
+      "answer": "怀柔项目（2025年怀柔区承塔线、京漠线及宝山寺东桥中修工程）的监理人计划开始监理日期为2025年9月30日，实际日期按照合同条款中约定的开始监理日期为准。",
+      "answerable": true,
+      "citations": [
+        "DOC014-C0001-3"
+      ],
+      "expected": [
+        "DOC014-C0001-3"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.68,
+      "tokens": 3416,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q20",
+      "question": "地质大数据平台项目的评标委员会是几个人？",
+      "category": "fact",
+      "answer": "评标委员会由采购人代表和评审专家组成，成员人数为五人以上单数，其中评审专家不得少于成员总数的三分之二；对于采购数额在1000万元以上、技术复杂的项目，评标委员会成员人数应当为7人以上单数。本项目预算金额为8510000.00元，未达到1000万元，因此按五人以上单数组建。",
+      "answerable": true,
+      "citations": [
+        "DOC003-C0018",
+        "DOC003-C0003-1"
+      ],
+      "expected": [
+        "DOC003-C0011-4"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.01,
+      "tokens": 3868,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": false
+    },
+    {
+      "id": "Q21",
+      "question": "潢川粮油项目一包的预算和最高限价是多少？",
+      "category": "cross",
+      "answer": "潢川县2025年粮油规模种植主体单产提升项目一包的预算金额（最高限价）为486500.00元，大写肆拾捌万陆仟伍佰元整；报价超过该最高限价按无效投标处理。",
+      "answerable": true,
+      "citations": [
+        "DOC009-C0013-1",
+        "DOC009-C0021-1"
+      ],
+      "expected": [
+        "DOC009-C0013-1",
+        "DOC009-C0021-1"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.3,
+      "tokens": 3579,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q22",
+      "question": "疫苗采购合同要履行多久？",
+      "category": "cross",
+      "answer": "疫苗采购合同的合同履行期限为1年。",
+      "answerable": true,
+      "citations": [
+        "DOC005-C0015-1",
+        "DOC005-C0002-4"
+      ],
+      "expected": [
+        "DOC005-C0002-4",
+        "DOC005-C0015-1"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.65,
+      "tokens": 3487,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q23",
+      "question": "指挥中心运维项目各个包的服务期限分别是几个月？",
+      "category": "cross",
+      "answer": "本项目各包的服务期限分别为：包1（OA办公系统运维、信创终端运维驻场服务）9个月；包2（河南省交通运输厅信息网络监测预警运维服务）12个月；包3（机房精密空调维保服务）12个月；包4（网络设备运维服务）12个月；包5（省厅交通运输视频会议系统运维）12个月；包6（地市和重点交通枢纽及运输单位应急会商终端服务）36个月；包7（交通中心、运输中心、建设中心、高速中心、技师学院门户网站迁移及运维服务）为合同签订至2026年12月31日；包8（厅办公大楼光纤更换）12个月；包9（指挥大厅设备优化改造）2个月。",
+      "answerable": true,
+      "citations": [
+        "DOC011-C0011-2",
+        "DOC011-C0003-2",
+        "DOC011-C0011-1"
+      ],
+      "expected": [
+        "DOC011-C0003-2",
+        "DOC011-C0011-1",
+        "DOC011-C0011-2"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.82,
+      "tokens": 4104,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q24",
+      "question": "疫苗项目投标要交保证金吗？",
+      "category": "cross",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [
+        "DOC005-C0009-6",
+        "DOC005-C0012-5"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.56,
+      "tokens": 3030,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q25",
+      "question": "OA 和信创终端的运维服务签到什么时候结束？",
+      "category": "cross",
+      "answer": "OA 办公系统运维服务和信创终端运维驻场服务（包1）的服务期限均为2026年4月1日至2026年12月31日，即到2026年12月31日结束。招标公告及投标人须知前附表中也载明包1服务期限为9个月。",
+      "answerable": true,
+      "citations": [
+        "DOC011-C0022-1",
+        "DOC011-C0023",
+        "DOC011-C0003-2",
+        "DOC011-C0011-2"
+      ],
+      "expected": [
+        "DOC011-C0022-1",
+        "DOC011-C0023"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.84,
+      "tokens": 4196,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q26",
+      "question": "这个项目什么时候通过验收的？",
+      "category": "unanswerable",
+      "answer": "所给条款未记载该项目实际通过验收的具体日期，仅规定了验收的程序和时限。按DOC003第七章：乙方书面发出初步验收申请后，甲方应在10个工作日内组织验收，验收合格应立即出具阶段项目初步验收合格书；存在问题的，乙方应在5个工作日内整改后重新提请验收；甲方逾期不验收、或验收后不签署合格书又不提交书面异议的，视为自乙方发出书面验收申请之日初步验收合格。项目终验同样为甲方在收到书面终验申请后10个工作日内组织完成，逾期不终验或不签署终验合格书又不提交书面异议的，视为自乙方发出终验申请之日终验合格。此外，DOC004约定服务期届满后30日内乙方提交工作总结报告和验收申请表，经甲方认可后双方共同组织项目验收并签署项目验收报告；DOC009约定采购人收到验收建议后成立验收小组进行实质性验收并出具验收书，验收中发现与合同规定不符的应在3天内提出书面异议。",
+      "answerable": true,
+      "citations": [
+        "DOC003-C0038",
+        "DOC004-C0005-2",
+        "DOC009-C0038",
+        "DOC009-C0030"
+      ],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.67,
+      "tokens": 3843,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q27",
+      "question": "中标通知书是哪天发出来的？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.0,
+      "tokens": 3008,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q28",
+      "question": "评标专家都有谁？",
+      "category": "unanswerable",
+      "answer": "评标委员会由采购人代表和评审专家组成，成员人数为五人以上单数，其中评审专家不得少于成员总数的三分之二；采购数额在1000万元以上、技术复杂的项目，评标委员会成员人数应当为7人以上单数。评审专家在《河南省财政厅政府采购专家库》中随机抽取后依法组建评标委员会。具体成员人数见投标人须知前附表。",
+      "answerable": true,
+      "citations": [
+        "DOC003-C0018",
+        "DOC011-C0011-25",
+        "DOC003-C0014-15"
+      ],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.77,
+      "tokens": 4086,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": false
+    },
+    {
+      "id": "Q29",
+      "question": "中标供应商的统一社会信用代码是多少？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.82,
+      "tokens": 2977,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q30",
+      "question": "这个项目哪天开工？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.43,
+      "tokens": 2390,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q31",
+      "question": "履约保证金要在拿到成交通知书后几天内交？",
+      "category": "fact",
+      "answer": "依据DOC002第十一条，乙方须在领取成交通知书之日起7日内按照磋商文件规定交纳足额的履约保证金。",
+      "answerable": true,
+      "citations": [
+        "DOC002-C0012"
+      ],
+      "expected": [
+        "DOC002-C0012"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.41,
+      "tokens": 3177,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q32",
+      "question": "这个平台的硬件设备出故障，乙方多长时间内要响应？",
+      "category": "fact",
+      "answer": "本项目质保期内硬件设备软件系统发生程序错误导致甲方不能正常使用时，乙方应在接到甲方通知后24小时内做出响应；紧急情况下应在接到甲方通知后2小时内进行调试、维护工作，确保甲方正常使用。",
+      "answerable": true,
+      "citations": [
+        "DOC003-C0044"
+      ],
+      "expected": [
+        "DOC003-C0044"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.05,
+      "tokens": 2297,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q33",
+      "question": "因为变更增加的工作量在多少以内，合同价不变？",
+      "category": "fact",
+      "answer": "依据DOC003第六章「项目变更」的约定，在不改变系统原有架构的基础上，且修改量不超过总工作量10%的，仍执行本合同价款。",
+      "answerable": true,
+      "citations": [
+        "DOC003-C0037"
+      ],
+      "expected": [
+        "DOC003-C0037"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.52,
+      "tokens": 2286,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q34",
+      "question": "潢川那个项目一包的农药，一亩地用多少？",
+      "category": "fact",
+      "answer": "根据招标文件第五章采购清单及技术要求，一包产品为2%甲氨基阿维菌素苯甲酸盐，其技术参数中明确亩使用量为30克/亩。",
+      "answerable": true,
+      "citations": [
+        "DOC009-C0037"
+      ],
+      "expected": [
+        "DOC009-C0037"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.9,
+      "tokens": 2949,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q35",
+      "question": "指挥中心运维项目里，紧急故障多久要响应？",
+      "category": "fact",
+      "answer": "根据招标文件，指挥中心基础运维项目要求7×24小时服务，紧急故障1小时内响应（非紧急故障4小时内响应）。此外，视频会议系统相关的故障响应时间要求为不超过30分钟，若电话技术支持不能解决，技术人员到达现场时间不超过60分钟。",
+      "answerable": true,
+      "citations": [
+        "DOC011-C0025-2",
+        "DOC011-C0031-5"
+      ],
+      "expected": [
+        "DOC011-C0025-2"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.16,
+      "tokens": 3018,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q36",
+      "question": "售后技术支持的响应时间最长不能超过多久？",
+      "category": "fact",
+      "answer": "不同文件对售后技术支持响应时间的要求不同：\n\n- 在DOC011第五章项目采购内容（包8：厅办公大楼光纤更换）中，要求投标人在服务期内提供7×24技术支持服务，当日响应，响应时间不得大于20分钟，到场时间不得大于1小时，日常故障修复时间不得大于1小时，重大故障必须1个工作日内解决。\n- 在同一DOC011第五章项目采购内容（视频会议系统维保部分）中，故障响应时间不超过30分钟，技术人员到达现场时间不超过60分钟。\n- 在DOC011第五章项目采购内容（包5：省厅交通运输视频会议系统维保）中，远程监控提供7×24小时技术支持和专人支持服务，遇到问题4小时内响应。\n- 在DOC011第五章项目采购内容（中国移动云视讯视频会议综合服务）中，提供7×24小时的专业技术支持服务，设备出现故障而通过远程不能解决时，须派遣专业技术人员在4小时内到达现场，到达现场后故障解决时间≤24小时。\n- 在DOC011第五章项目采购内容（视频会议音效提升）中，应急故障响应提供5分钟内现场响应；售后服务为远程技术支持7×8小时，12个月。\n- 在DOC002第六条中，维修人员接到维修电话后须在24小时内赶到现场；质保期内出现工艺异常、出水水质异常情况，乙方应在24小时内赶到现场。",
+      "answerable": true,
+      "citations": [
+        "DOC011-C0031-15",
+        "DOC011-C0031-5",
+        "DOC011-C0027",
+        "DOC011-C0029-1",
+        "DOC011-C0036-1",
+        "DOC002-C0007-1"
+      ],
+      "expected": [
+        "DOC011-C0031-15"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.67,
+      "tokens": 5216,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q37",
+      "question": "网络监测预警设备的原厂维保从哪天开始？",
+      "category": "fact",
+      "answer": "网络监测预警设备的原厂维保服务期限为2026年1月20日至2027年1月20日，即从2026年1月20日开始。",
+      "answerable": true,
+      "citations": [
+        "DOC011-C0024"
+      ],
+      "expected": [
+        "DOC011-C0027",
+        "DOC011-C0024"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.06,
+      "tokens": 2914,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q38",
+      "question": "门头沟那个项目涉及几条公路、多少处隐患点？",
+      "category": "cross",
+      "answer": "2025年门头沟区普通公路沿线地质灾害防治工程涉及门头沟区9条公路（S209石担路、S211斋幽路、S219南雁路、X002妙峰山路、X007斋柏路、X016南赵路、X017清千路、X209军红路、X210高芹路），约36处地质灾害隐患点的治理；本项目最终实施规模以批复为准。",
+      "answerable": true,
+      "citations": [
+        "DOC010-C0008",
+        "DOC010-C0001-1"
+      ],
+      "expected": [
+        "DOC010-C0001-1",
+        "DOC010-C0008"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.67,
+      "tokens": 3344,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q39",
+      "question": "监理合同的缺陷责任期是多长时间？",
+      "category": "cross",
+      "answer": "所给条款中涉及三份监理合同，缺陷责任期阶段监理均为365日历天：DOC012约定监理服务期限425日历天，其中缺陷责任期阶段监理365日历天；DOC014约定监理服务期限457日历天，其中缺陷责任期阶段监理365日历天；DOC010约定监理服务期限488日历天，其中缺陷责任期阶段监理365日历天。",
+      "answerable": true,
+      "citations": [
+        "DOC012-C0001-3",
+        "DOC014-C0001-3",
+        "DOC010-C0001-3"
+      ],
+      "expected": [
+        "DOC010-C0001-3",
+        "DOC012-C0001-3",
+        "DOC014-C0001-3"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.91,
+      "tokens": 4013,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q40",
+      "question": "监理项目要按什么比例配安全员？",
+      "category": "cross",
+      "answer": "现场设置的安全机构，应按监理人员的1%～3%配备安全员，专职负责所有员工的安全和治安保卫工作及预防事故的发生。",
+      "answerable": true,
+      "citations": [
+        "DOC012-C0007-3",
+        "DOC014-C0001-6"
+      ],
+      "expected": [
+        "DOC012-C0007-3",
+        "DOC014-C0001-6"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.34,
+      "tokens": 3587,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q41",
+      "question": "疫苗项目和信阳抽检项目各分几个包？",
+      "category": "cross",
+      "answer": "疫苗项目（河南省农业农村厅2025年动物疫病强制免疫疫苗项目）共分9个包；信阳抽检项目（信阳市市场监督管理局2025年市本级食品安全抽检项目）在招标公告中列示了1包至6包（其中6包预算为332965元），但所给片段未明确写出该项目分包总数。",
+      "answerable": true,
+      "citations": [
+        "DOC005-C0002-3",
+        "DOC005-C0013",
+        "DOC008-C0013-1",
+        "DOC008-C0021-1"
+      ],
+      "expected": [
+        "DOC005-C0002-3",
+        "DOC005-C0013",
+        "DOC008-C0013-2"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.78,
+      "tokens": 4389,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q42",
+      "question": "几个监理项目的总监理工程师分别是谁？",
+      "category": "cross",
+      "answer": "所给条款涉及三个监理项目的总监理工程师：DOC010 项目（2025年门头沟区普通公路沿线地质灾害防治工程）的总监理工程师为刘俊学；DOC012 项目的总监理工程师为景国宁；DOC014 项目的总监理工程师为王金生。",
+      "answerable": true,
+      "citations": [
+        "DOC010-C0001-2",
+        "DOC012-C0001-2",
+        "DOC014-C0001-2"
+      ],
+      "expected": [
+        "DOC010-C0001-2",
+        "DOC012-C0001-2",
+        "DOC014-C0001-2"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 5.47,
+      "tokens": 4255,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q43",
+      "question": "廉政合同从什么时候开始生效？",
+      "category": "cross",
+      "answer": "所给条款片段中未包含廉政合同生效时间的规定，无法据此确定其生效时间。",
+      "answerable": false,
+      "citations": [],
+      "expected": [
+        "DOC010-C0006",
+        "DOC012-C0006",
+        "DOC014-C0006"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.9,
+      "tokens": 2097,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q44",
+      "question": "投标还需要另外交纸质文件吗？",
+      "category": "cross",
+      "answer": "不需要。根据招标文件规定，除电子投标（响应）文件外，不再接受任何纸质文件、资料原件等；供应商无需寄送和递交非加密的电子投标文件，也无需到现场提交原件资料。投标文件只需在投标截止时间前将加密的电子投标文件（*.XYTF格式）上传至会员系统指定位置即可。",
+      "answerable": true,
+      "citations": [
+        "DOC009-C0008",
+        "DOC008-C0008",
+        "DOC009-C0021-3"
+      ],
+      "expected": [
+        "DOC008-C0008",
+        "DOC009-C0008"
+      ],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 4.45,
+      "tokens": 3144,
+      "error": "",
+      "answer_hit": true,
+      "cite_hit": true,
+      "both": true,
+      "refused": false
+    },
+    {
+      "id": "Q45",
+      "question": "中标供应商的注册资本是多少？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.45,
+      "tokens": 3038,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q46",
+      "question": "这个项目的环境影响评价批复文号是多少？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 2.95,
+      "tokens": 2367,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q47",
+      "question": "疫苗的接种剂量是多少？",
+      "category": "unanswerable",
+      "answer": "这个问题不需要查阅合同条款，超出本工具范围。",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 0,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 0.96,
+      "tokens": 217,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q48",
+      "question": "农民工工资保证金要交多少？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.53,
+      "tokens": 2545,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q49",
+      "question": "计划竣工日期是哪天？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.76,
+      "tokens": 2675,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    },
+    {
+      "id": "Q50",
+      "question": "中标供应商的注册地址是哪里？",
+      "category": "unanswerable",
+      "answer": "未在所给条款中找到依据",
+      "answerable": false,
+      "citations": [],
+      "expected": [],
+      "verify_rounds": 1,
+      "verify_problems": [],
+      "needs_review": false,
+      "review_reasons": [],
+      "elapsed": 3.61,
+      "tokens": 2677,
+      "error": "",
+      "answer_hit": false,
+      "cite_hit": false,
+      "both": false,
+      "refused": true
+    }
+  ]
+}
