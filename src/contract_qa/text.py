@@ -61,11 +61,19 @@ def normalize_for_match(text: str) -> str:
 
 
 def extract_pages(pdf_path: Path) -> tuple[list[tuple[int, str]], int]:
-    """返回 [(页码, 页文本)], 总页数。页码从 1 开始。"""
-    doc = pymupdf.open(pdf_path)
+    """返回 [(页码, 页文本)], 总页数。页码从 1 开始。
+
+    加密、损坏或非 PDF 文件统一转成带文件名的异常，由上层按单份文件捕获。
+    """
+    try:
+        doc = pymupdf.open(pdf_path)
+    except Exception as exc:
+        raise ValueError(f"无法打开 PDF {pdf_path.name}：{exc}") from exc
     try:
         pages = [(i + 1, page.get_text("text")) for i, page in enumerate(doc)]
         return pages, doc.page_count
+    except Exception as exc:
+        raise ValueError(f"读取 PDF 内容失败 {pdf_path.name}：{exc}") from exc
     finally:
         doc.close()
 
@@ -87,7 +95,13 @@ def page_stats(pages: list[tuple[int, str]]) -> list[PageStat]:
 def _running_keys(pages: list[tuple[int, str]]) -> set[str]:
     """找出跨页重复出现的短行（页眉、页脚、水印、密级标识）。"""
     if len(pages) < RUNNING_LINE_MIN_PAGES:
-        return set()
+        if len(pages) < 3:
+            return set()
+        # 短文档不能套用固定 5 页门槛，否则页眉完全不被清洗；
+        # 但也不能放松到「出现 2 次就删」，所以要求几乎每页都出现
+        threshold = len(pages)
+    else:
+        threshold = max(RUNNING_LINE_MIN_PAGES, int(len(pages) * RUNNING_LINE_RATIO))
     seen: dict[str, set[int]] = defaultdict(set)
     for page_no, text in pages:
         for raw in text.splitlines():
@@ -95,7 +109,6 @@ def _running_keys(pages: list[tuple[int, str]]) -> set[str]:
             if not key or len(key) > RUNNING_LINE_MAX_LEN:
                 continue
             seen[key].add(page_no)
-    threshold = max(RUNNING_LINE_MIN_PAGES, int(len(pages) * RUNNING_LINE_RATIO))
     return {key for key, pages_hit in seen.items() if len(pages_hit) >= threshold}
 
 
@@ -193,8 +206,13 @@ def _merge_bare_headings(raw: list[tuple[str, int]]) -> tuple[list[tuple[str, in
             normalize_for_match(label)
         ) + 1
         if bare and index + 1 < len(raw):
-            nxt, _ = raw[index + 1]
-            if classify_heading(nxt)[0] == 0 and len(nxt) <= 40:
+            nxt, next_page = raw[index + 1]
+            # 只在同页合并：跨页拼接会把下一页的首行错误并进本章标题
+            if (
+                next_page == page_no
+                and classify_heading(nxt)[0] == 0
+                and len(nxt) <= 40
+            ):
                 out.append((f"{text} {nxt}", page_no))
                 merged += 1
                 index += 2

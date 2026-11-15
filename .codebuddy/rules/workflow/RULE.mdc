@@ -1,0 +1,38 @@
+---
+description: 开发工作流：常用命令、测试与验收流程、文档与数据纪律
+alwaysApply: false
+enabled: true
+---
+
+# 工作流
+
+## 环境（Windows PowerShell）
+
+- 一律用 uv：`uv sync` 装依赖，`uv run <cmd>` 执行，不要绕过 uv 直接 pip
+- 纯标准库回退路径在 PowerShell 下用 `$env:PYTHONPATH = "src"`，不是 bash 的 `PYTHONPATH=src`
+- 密钥在 `.env`（参照 `.env.example`），LLM 用 DeepSeek，Embedding 用硅基流动（两家服务）
+
+## 常用命令
+
+```powershell
+uv run contract-qa check                 # 环境与数据检查
+uv run contract-qa parse                 # PDF -> 条款 JSONL
+uv run contract-qa index                 # 建 BM25 与向量索引
+uv run contract-qa ask "..." --top-k 8 --show-hits
+uv run pytest                            # 测试（testpaths=tests，pythonpath=src）
+uv run ruff check .                      # lint
+```
+
+## 改动验证顺序
+
+1. `uv run ruff check .`
+2. `uv run pytest`
+3. 涉及主链路时跑冒烟并更新 `docs/smoke.md`；涉及解析切分时对照 `docs/parse-acceptance.md`
+4. 涉及检索时用 `docs/eval-d5.md` 的 15 条种子题跑 Recall@5 对照，不得只凭感觉判断变好
+
+## 文档与数据纪律
+
+- 关键决策与踩坑记录进 `docs/`（参考 `docs/problems/` 的现象/原因/处理/教训格式）
+- 指标只写实测值；测试 PDF 产物、解析 JSONL 不进版本库
+- 5 份扫描件是刻意保留的解析失败样本，不要试图"修复"它们让其参与切分
+- 当前里程碑：D1–D5 已完成，正在做 D6（verify 节点引用校验与最多 2 轮回退）

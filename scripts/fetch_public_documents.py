@@ -2,12 +2,21 @@
 
 The files stay in data/raw/ and are ignored by Git. Source URLs are official
 government procurement or public-resource trading platforms.
+
+安全约定：
+- 优先使用 HTTPS（加密连接）；政府站点老链接可能是明文 HTTP，只在加密连接失败时回退，
+  并明确打印警告；
+- 响应限制最大体积，校验 PDF 头（%PDF-）与尾（%%EOF）；
+- 每份文件计算 SHA-256（安全散列），首次下载写入 sha256.txt 作为基准，
+  之后的运行会用记录值比对，被替换的文件会被发现。
 """
 
 from __future__ import annotations
 
 import concurrent.futures
+import hashlib
 import sys
+import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,10 +24,13 @@ from urllib.parse import urlparse
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
+HASH_FILE = RAW_DIR / "sha256.txt"
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36"
 )
+MAX_BYTES = 50 * 1024 * 1024  # 政府采购文件单份超过 50MB 视为异常
+EOF_TAIL_BYTES = 1024         # 末尾允许 EOF 标记后有少量字节
 
 
 @dataclass(frozen=True)
@@ -159,14 +171,45 @@ SOURCES = [
 ]
 
 
-def download(source: Source) -> tuple[str, str]:
-    destination = RAW_DIR / source.filename
-    if destination.exists() and destination.read_bytes()[:5] == b"%PDF-":
-        return source.doc_id, f"已存在 {destination.name}"
+def _sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
 
-    parsed = urlparse(source.url)
+
+def _load_hashes() -> dict[str, str]:
+    if not HASH_FILE.exists():
+        return {}
+    hashes: dict[str, str] = {}
+    for line in HASH_FILE.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        digest, _, name = line.partition("  ")
+        hashes[name.strip()] = digest.strip()
+    return hashes
+
+
+def _save_hashes(hashes: dict[str, str]) -> None:
+    lines = [f"{digest}  {name}" for name, digest in sorted(hashes.items())]
+    HASH_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _looks_pdf(path: Path) -> bool:
+    with path.open("rb") as fh:
+        return fh.read(5) == b"%PDF-"
+
+
+def _candidate_urls(url: str) -> list[tuple[str, str]]:
+    """HTTPS 优先；只有原链接是明文 HTTP 才追加加密镜像。返回 [(url, 标记)]。"""
+    parsed = urlparse(url)
+    if parsed.scheme == "https":
+        return [(url, "https")]
+    secure = parsed._replace(scheme="https").geturl()
+    return [(secure, "https"), (url, "http")]
+
+
+def _fetch(url: str, source: Source, destination: Path, hashes: dict[str, str]) -> str:
+    parsed = urlparse(url)
     request = urllib.request.Request(
-        source.url,
+        url,
         headers={
             "User-Agent": USER_AGENT,
             "Referer": f"{parsed.scheme}://{parsed.netloc}/",
@@ -176,14 +219,56 @@ def download(source: Source) -> tuple[str, str]:
     partial = destination.with_suffix(destination.suffix + ".part")
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
-            data = response.read()
+            data = response.read(MAX_BYTES + 1)
+        if len(data) > MAX_BYTES:
+            raise ValueError(f"响应超过 {MAX_BYTES // (1024 * 1024)} MB 上限")
         if not data.startswith(b"%PDF-"):
             raise ValueError("响应不是 PDF")
+        if b"%%EOF" not in data[-EOF_TAIL_BYTES:]:
+            raise ValueError("PDF 缺少结尾标记 %%EOF，文件可能不完整")
         partial.write_bytes(data)
+        digest = _sha256(data)
+        recorded = hashes.get(source.filename)
+        if recorded and recorded != digest:
+            raise ValueError(
+                f"下载内容与已记录的 SHA-256 不符（{source.filename}），疑似被替换，拒绝覆盖"
+            )
         partial.replace(destination)
-        return source.doc_id, f"成功 {len(data) / 1024:.0f} KB"
+        hashes[source.filename] = digest
+        return f"成功 {len(data) / 1024:.0f} KB"
     finally:
         partial.unlink(missing_ok=True)
+
+
+def download(source: Source) -> tuple[str, str]:
+    hashes = _load_hashes()
+    destination = RAW_DIR / source.filename
+    if destination.exists():
+        if not _looks_pdf(destination):
+            raise ValueError(f"已存在文件不是有效 PDF：{destination.name}")
+        digest = _sha256(destination.read_bytes())
+        recorded = hashes.get(source.filename)
+        if recorded and recorded != digest:
+            raise ValueError(
+                f"已存在文件与记录的 SHA-256 不符（{destination.name}），疑似被改动，"
+                "请先人工确认后更新 sha256.txt"
+            )
+        return source.doc_id, f"已存在 {destination.name}"
+
+    errors: list[str] = []
+    for url, scheme in _candidate_urls(source.url):
+        try:
+            message = _fetch(url, source, destination, hashes)
+            _save_hashes(hashes)
+            return source.doc_id, message
+        except Exception as exc:  # noqa: BLE001 - 逐镜像记录失败原因
+            errors.append(f"{scheme} {exc}")
+            if scheme == "https":
+                print(
+                    f"{source.doc_id}  警告：加密连接失败，回退明文 HTTP：{exc}",
+                    file=sys.stderr,
+                )
+    raise RuntimeError("所有镜像均失败：" + "；".join(errors))
 
 
 def main() -> None:

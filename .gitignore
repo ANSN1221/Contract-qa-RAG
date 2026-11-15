@@ -17,6 +17,8 @@ build/
 data/raw/*.pdf
 data/rejected/
 data/processed/
+# 重切分等操作前的人工备份，同样是生成物
+data/processed_backup_*/
 chroma/
 *.sqlite3
 

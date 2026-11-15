@@ -7,10 +7,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+# 低文本页占比达到该值即视为扫描件；字符总和阈值只兜底极短文档
+SCANNED_LOW_TEXT_RATIO = 0.8
+SCANNED_MIN_TOTAL_CHARS = 200
+
 
 @dataclass(frozen=True)
 class Line:
-    """清洗后的单行文本，保留它来自哪一页、在全文中的偏移量。"""
+    """清洗后的单行文本，保留它来自哪一页。
+
+    offset 是「清洗后行序列」的累计偏移（每行按 len(text)+1 累加），
+    不是原始 PDF 的字符偏移；它只用于条款内部的相对定位与合并计算。
+    """
 
     text: str
     page_no: int
@@ -85,7 +93,16 @@ class ParseResult:
 
     @property
     def is_scanned(self) -> bool:
-        return self.total_chars < 200
+        """是否纯扫描件。
+
+        不能只看整份文档的字符总和：扫描件常带页眉、水印、页码，
+        页数一多总和就会超过阈值。低文本页占比才是主要依据。
+        """
+        if not self.page_stats:
+            return True
+        if self.low_text_pages / len(self.page_stats) >= SCANNED_LOW_TEXT_RATIO:
+            return True
+        return self.total_chars < SCANNED_MIN_TOTAL_CHARS
 
     def summary(self) -> dict[str, object]:
         lens = sorted(c.char_len for c in self.clauses)

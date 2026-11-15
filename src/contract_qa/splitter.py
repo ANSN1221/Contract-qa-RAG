@@ -3,7 +3,8 @@
 三种模式，按文档自身的编号体系自动选择，绝不混用：
 
 - article：「第X条」数量足够 -> 以条为引用单元，章/节作为 chapter_path
-- outline: 靠 一、/1./1.1 分层 -> 逐层试切，取中位长度最接近目标的层级
+- outline: 靠 一、/1./1.1 分层 -> 逐层试切，优先取中位长度落在 60–700 字符的
+  最粗层级；都不合适时退回「最接近 350 字符」的层级
 - chunk  : 完全没有稳定编号 -> 按字符窗口切，强制带页码，标记为弱引用
 
 任何一条被切出来的 Clause 都必须能回答：属于哪份文件、第几页、原文是什么。
@@ -26,8 +27,9 @@ TARGET_CLAUSE_CHARS = 350
 CHUNK_SIZE = 700
 CHUNK_OVERLAP = 120
 MIN_CLAUSE_CHARS = 30
+MIN_MERGED_CLAUSE_CHARS = 40
 HEADING_ONLY_MAX_CHARS = 30
-MAX_CLAUSE_CHARS = 1200
+MAX_CLAUSE_CHARS = 500
 BREAK_CHARS = "。；！？;!?；:"
 BREAK_SEARCH_WINDOW = 240
 
@@ -250,40 +252,55 @@ def _finalize(doc_id: str, clauses: list[Clause]) -> tuple[list[Clause], int]:
             and not is_heading_only
         ):
             prev = kept[-1]
-            kept[-1] = Clause(
-                doc_id=prev.doc_id,
-                clause_id=prev.clause_id,
-                chapter_path=prev.chapter_path,
-                clause_no=prev.clause_no,
+            kept[-1] = replace(
+                prev,
                 text=f"{prev.text}{clause.text}",
-                page_start=prev.page_start,
                 page_end=clause.page_end,
-                char_start=prev.char_start,
                 char_end=clause.char_end,
-                split_mode=prev.split_mode,
             )
             merged += 1
             continue
         kept.append(clause)
 
     kept = _merge_heading_only(kept)
+    kept = _merge_short_numbered(kept)
 
+    # 统一用 replace：手工逐字段重建容易在新增字段时漏掉（parent_clause_id 就曾漏过）
     numbered = [
-        Clause(
-            doc_id=c.doc_id,
-            clause_id=f"{doc_id}-C{index:04d}",
-            chapter_path=c.chapter_path,
-            clause_no=c.clause_no,
-            text=c.text,
-            page_start=c.page_start,
-            page_end=c.page_end,
-            char_start=c.char_start,
-            char_end=c.char_end,
-            split_mode=c.split_mode,
-        )
+        replace(c, clause_id=f"{doc_id}-C{index:04d}")
         for index, c in enumerate(kept, start=1)
     ]
     return _split_oversized(numbered), merged
+
+
+def _merge_short_numbered(clauses: list[Clause]) -> list[Clause]:
+    """把带编号的单行极短条目并入上一条。
+
+    公告里的「6、合同履行期限：1年。」只有十几个字，单独成条后
+    在 BM25 和向量两端的相似度都被长条款压过，等于索引了一条永远
+    检索不到的条款。并入相邻条款后文本变长，答案仍在原文中可核对。
+    只处理单行条目：「标题 + 正文」两行的正常条款不受影响。
+    「第X条」模式不归并：条是合同引用单元，不能随意合并。
+    """
+    out: list[Clause] = []
+    for clause in clauses:
+        if (
+            out
+            and clause.split_mode != "article"
+            and clause.clause_no
+            and clause.char_len < MIN_MERGED_CLAUSE_CHARS
+            and "\n" not in clause.text
+        ):
+            prev = out[-1]
+            out[-1] = replace(
+                prev,
+                text=f"{prev.text}\n{clause.text}",
+                page_end=clause.page_end,
+                char_end=clause.char_end,
+            )
+            continue
+        out.append(clause)
+    return out
 
 
 def _is_heading_only(clause: Clause) -> bool:
@@ -336,33 +353,32 @@ def _split_oversized(clauses: list[Clause]) -> list[Clause]:
 
     切出来的片段沿用它所属条款的编号与页码范围，clause_id 加序号后缀，
     并在 parent_clause_id 里留下原始 id，保证引用可回溯、也不会伪造页码。
+    字符偏移按实际切分位置重算，不再让所有片段共用父条款的同一区间。
     """
     out: list[Clause] = []
     for clause in clauses:
         if clause.char_len <= MAX_CLAUSE_CHARS:
             out.append(clause)
             continue
-        for part_index, piece in enumerate(_cut_text(clause.text), start=1):
+        for part_index, (piece, rel_start, rel_end) in enumerate(
+            _cut_text(clause.text), start=1
+        ):
             out.append(
-                Clause(
-                    doc_id=clause.doc_id,
+                replace(
+                    clause,
                     clause_id=f"{clause.clause_id}-{part_index}",
-                    chapter_path=clause.chapter_path,
-                    clause_no=clause.clause_no,
                     text=piece,
-                    page_start=clause.page_start,
-                    page_end=clause.page_end,
-                    char_start=clause.char_start,
-                    char_end=clause.char_end,
-                    split_mode=clause.split_mode,
+                    char_start=clause.char_start + rel_start,
+                    char_end=clause.char_start + rel_end,
                     parent_clause_id=clause.clause_id,
                 )
             )
     return out
 
 
-def _cut_text(text: str) -> list[str]:
-    pieces: list[str] = []
+def _cut_text(text: str) -> list[tuple[str, int, int]]:
+    """按标点切长文，返回 (片段, 片段在原文中的起止偏移)。"""
+    pieces: list[tuple[str, int, int]] = []
     start = 0
     while start < len(text):
         end = min(start + MAX_CLAUSE_CHARS, len(text))
@@ -375,6 +391,8 @@ def _cut_text(text: str) -> list[str]:
                     break
             if cut > start:
                 end = cut
-        pieces.append(text[start:end].strip())
+        piece = text[start:end].strip()
+        if piece:
+            pieces.append((piece, start, end))
         start = end
-    return [p for p in pieces if p]
+    return pieces

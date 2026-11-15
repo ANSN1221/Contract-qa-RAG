@@ -5,6 +5,8 @@
 2. 文本覆盖率——切分后保留的字符数 / 可抽取字符总数
 3. 粒度分布——条款长度中位数、超长条数
 4. 结构完整性——chapter_path 与 clause_no 的填充率
+
+文档末尾「已知局限」等定性段落为固定说明，不随本次运行变化。
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ from pathlib import Path
 
 import pymupdf
 
+from contract_qa.index import read_clause_rows
 from contract_qa.text import normalize_for_match
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -31,8 +34,7 @@ def load_clauses(doc_id: str) -> list[dict]:
     path = PROCESSED / f"{doc_id}.jsonl"
     if not path.exists():
         return []
-    with path.open(encoding="utf-8") as fh:
-        return [json.loads(line) for line in fh]
+    return read_clause_rows(path)
 
 
 def page_texts(pdf_path: Path) -> list[str]:
@@ -55,12 +57,16 @@ def check_pages(
     sample = rng.sample(clauses, min(SAMPLE_PER_DOC, len(clauses)))
     strict = 0
     region = 0
+    checked = 0
     failures: list[dict] = []
     for clause in sample:
         prefix = normalize_for_match(clause["text"])[:PREFIX_CHARS]
         if not prefix:
             continue
         start, end = clause["page_start"], clause["page_end"]
+        if start < 1 or start > len(pages):
+            continue  # 页码越界的数据不纳入命中率分母
+        checked += 1
         window_pages = pages[start - 1 : end]
         window = "".join(window_pages)
         if any(prefix in page for page in window_pages):
@@ -79,7 +85,7 @@ def check_pages(
                     "prefix": prefix[:30],
                 }
             )
-    return strict, region, len(sample), failures
+    return strict, region, checked, failures
 
 
 def main() -> int:
@@ -94,7 +100,11 @@ def main() -> int:
         if doc["scanned"]:
             continue
         clauses = load_clauses(doc["doc_id"])
-        pages = page_texts(RAW / doc["source_file"])
+        try:
+            pages = page_texts(RAW / doc["source_file"])
+        except Exception as exc:  # 单份源文件缺失或损坏不拖垮整批
+            print(f"{doc['doc_id']}  读取 PDF 失败，跳过：{exc}")
+            continue
         strict, region, n, failures = check_pages(clauses, pages, rng)
         tot_strict += strict
         tot_region += region
@@ -117,8 +127,12 @@ def main() -> int:
                 "coverage": chars_kept / doc["total_chars"] if doc["total_chars"] else 0,
                 "strict": f"{strict}/{n}",
                 "region": f"{region}/{n}",
-                "path_filled": sum(1 for c in clauses if c["chapter_path"]) / len(clauses),
-                "no_filled": sum(1 for c in clauses if c["clause_no"]) / len(clauses),
+                "path_filled": (
+                    sum(1 for c in clauses if c["chapter_path"]) / len(clauses) if clauses else 0
+                ),
+                "no_filled": (
+                    sum(1 for c in clauses if c["clause_no"]) / len(clauses) if clauses else 0
+                ),
             }
         )
 
@@ -140,20 +154,26 @@ def main() -> int:
             f"{r['median']} | {r['max']} | {r['coverage']:.0%} | {r['strict']} | {r['region']} |"
         )
 
-    avg_cov = sum(r["coverage"] for r in rows) / len(rows)
-    avg_path = sum(r["path_filled"] for r in rows) / len(rows)
-    avg_no = sum(r["no_filled"] for r in rows) / len(rows)
+    avg_cov = sum(r["coverage"] for r in rows) / len(rows) if rows else 0
+    avg_path = sum(r["path_filled"] for r in rows) / len(rows) if rows else 0
+    avg_no = sum(r["no_filled"] for r in rows) / len(rows) if rows else 0
     lines += [
         "",
         "## 二、汇总",
         "",
         f"- 参与切分文档：{len(rows)} 份，共 {tot_clauses} 条条款",
-        f"- 页码严格命中：{tot_strict}/{tot_n}（{tot_strict / tot_n:.1%}）",
-        f"- 页码区域命中：{tot_region}/{tot_n}（{tot_region / tot_n:.1%}）",
+        f"- 页码严格命中：{tot_strict}/{tot_n}"
+        + (f"（{tot_strict / tot_n:.1%}）" if tot_n else "（无可抽样条款）"),
+        f"- 页码区域命中：{tot_region}/{tot_n}"
+        + (f"（{tot_region / tot_n:.1%}）" if tot_n else "（无可抽样条款）"),
         f"- 平均文本覆盖率：{avg_cov:.1%}",
         f"- chapter_path 填充率：{avg_path:.1%}；clause_no 填充率：{avg_no:.1%}",
-        f"- 最长条款 {max(r['max'] for r in rows)} 字符，"
-        "超长条已按标点切分为带 parent_clause_id 的片段",
+        (
+            f"- 最长条款 {max(r['max'] for r in rows)} 字符，"
+            "超长条已按标点切分为带 parent_clause_id 的片段"
+            if rows
+            else "- 没有可验收的文档"
+        ),
         "",
         "两个页码口径的差额，主要来自跨页条款与被丢弃的页眉页脚：页眉被移除后，"
         "条款文本与原始页面文本不再逐字连续，严格比对必然失败，但引用指向的页面仍然是对的。",
@@ -198,7 +218,7 @@ def main() -> int:
 
     lines += [
         "",
-        "## 四、已知局限",
+        "## 四、已知局限（固定说明，非本次运行结论）",
         "",
         "1. **页码口径**：严格命中要求条款正文前 40 字连续出现在某一页上，"
         "跨页条款与含页眉页脚的页面必然判失败，因此以区域命中为主要参考。",

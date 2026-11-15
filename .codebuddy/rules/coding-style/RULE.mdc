@@ -1,0 +1,27 @@
+---
+description: 本项目的 Python 编码规范：ruff 配置、src layout、类型注解与 structlog 日志约定
+alwaysApply: false
+enabled: true
+---
+
+# 编码规范
+
+## 工具链（以 pyproject.toml 为准）
+
+- ruff：`target-version = "py311"`，`line-length = 100`，`src = ["src", "tests"]`
+- lint 规则集：`E, F, I, B, UP`（isort、bugbear、pyupgrade 全开）
+- 提交前必须通过：`uv run ruff check .` 与 `uv run pytest`
+
+## 结构与风格
+
+- 严格 src layout：业务代码只放 `src/contract_qa`，不要在仓库根目录新增包
+- import 顺序按 ruff isort 自动整理：标准库 → 第三方 → 本地（`contract_qa.*`）
+- Python 3.11+ 语法可用（`Self`、`tomllib`、`StrEnum` 等），不要写 3.10 及以下的兼容垫片
+- 数据结构优先用 pydantic v2 模型；配置项统一走 `config.py` 聚合，不要散落各模块直接读环境变量
+- 日志统一用 structlog，不要混用 print / logging
+
+## 硬约束
+
+- 检索权重等用户可调配置：非法值必须显式报错（raise），不得静默回退到默认值
+- 生成代码必须能在 `uv sync` 后直接运行；引入新第三方依赖前先确认确有必要
+- 不要为了"通用"引入重型框架（如完整 LangChain），当前依赖刻意保持精简

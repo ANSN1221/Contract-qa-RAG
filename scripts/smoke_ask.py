@@ -1,7 +1,9 @@
 """D3 冒烟测试：固定问题集跑一遍问答，记录答案、引用与耗时。
 
 用途有两个：验证链路通；给后续 D5/D6 的改动留一个可比对的基线。
-结果写入 docs/d3-smoke.md，数字全部来自本次运行。
+结果写入 docs/smoke.md。表格里的答案、耗时、tokens 全部来自本次运行；
+文末「已知问题」是固定说明，不代表本次运行结论。
+单题失败只记录该题结果，不中断整组。
 """
 
 from __future__ import annotations
@@ -24,38 +26,60 @@ QUESTIONS = [
 ]
 
 
+def _md_cell(text: str) -> str:
+    """转义竖线与换行，避免模型答案破坏 Markdown 表格。"""
+    return str(text).replace("|", "\\|").replace("\r", " ").replace("\n", "<br>")
+
+
 def main() -> int:
     rows = []
     total_tokens = 0
     answerable_hits = 0
+    failed = 0
 
     for kind, question in QUESTIONS:
         started = time.perf_counter()
-        result = get_graph().ask(question)
-        elapsed = time.perf_counter() - started
-        total_tokens += result.tokens
-        answerable_hits += int(result.answerable)
-        cites = "、".join(
-            f"{c['label']}（第{c['page_start']}-{c['page_end']}页）" for c in result.citations
-        ) or "—"
-        rows.append(
-            {
-                "kind": kind,
-                "route": result.route,
-                "queries": " / ".join(result.queries) or "—",
-                "question": question,
-                "answer": result.answer,
-                "cites": cites,
-                "answerable": "是" if result.answerable else "否",
-                "latency": elapsed,
-                "tokens": result.tokens,
-            }
-        )
+        try:
+            result = get_graph().ask(question)
+            elapsed = time.perf_counter() - started
+            total_tokens += result.tokens
+            answerable_hits += int(result.answerable)
+            cites = "、".join(
+                f"{c['label']}（第{c['page_start']}-{c['page_end']}页）" for c in result.citations
+            ) or "—"
+            rows.append(
+                {
+                    "kind": kind,
+                    "route": result.route,
+                    "queries": " / ".join(result.queries) or "—",
+                    "question": question,
+                    "answer": result.answer,
+                    "cites": cites,
+                    "answerable": "是" if result.answerable else "否",
+                    "latency": elapsed,
+                    "tokens": result.tokens,
+                }
+            )
+        except Exception as exc:  # 单题失败记录结果，不中断整组
+            failed += 1
+            rows.append(
+                {
+                    "kind": kind,
+                    "route": "—",
+                    "queries": "—",
+                    "question": question,
+                    "answer": f"链路失败：{type(exc).__name__}: {exc}",
+                    "cites": "—",
+                    "answerable": "失败",
+                    "latency": time.perf_counter() - started,
+                    "tokens": 0,
+                }
+            )
 
     lines = [
         "# 冒烟测试记录（最新基线）",
         "",
-        "> 由 `scripts/smoke_ask.py` 生成，指标为本次真实运行结果，未做人工修正。",
+        "> 由 `scripts/smoke_ask.py` 生成，表格数字为本次真实运行结果，未做人工修正。",
         "> 语料：10 份可解析文档、569 条条款；"
         "检索：BM25 + bge-m3 向量，加权 RRF（BM25 1.0 / 向量 0.5）；",
         "> 生成：DeepSeek deepseek-chat，候选 8 条。",
@@ -65,8 +89,9 @@ def main() -> int:
     ]
     for row in rows:
         lines.append(
-            f"| {row['kind']} | {row['question']} | {row['route']} | {row['queries']} | "
-            f"{row['answer']} | {row['cites']} | {row['answerable']} | "
+            f"| {row['kind']} | {_md_cell(row['question'])} | {row['route']} | "
+            f"{_md_cell(row['queries'])} | {_md_cell(row['answer'])} | {_md_cell(row['cites'])} | "
+            f"{row['answerable']} | "
             f"{row['latency']:.2f} | {row['tokens']} |"
         )
 
@@ -76,10 +101,11 @@ def main() -> int:
         "",
         f"- 问题数：{len(rows)}",
         f"- 判定可答：{answerable_hits}/{len(rows)}",
+        f"- 链路失败：{failed} 题",
         f"- 总 tokens：{total_tokens}",
         f"- 平均耗时：{sum(r['latency'] for r in rows) / len(rows):.2f} s",
         "",
-        "## 已知问题",
+        "## 已知问题（固定说明，非本次运行结论）",
         "",
         "1. **向量召回噪声大**：对「投标保证金」这类术语，bge-m3 会召回「反商业贿赂承诺书」等"
         "语义相近但无用的条款。已用加权 RRF 压制（BM25 权重 1.0、向量 0.5），"
@@ -93,7 +119,7 @@ def main() -> int:
     REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     print(f"\n写入 {REPORT}")
-    return 0
+    return 0 if failed == 0 else 1
 
 
 if __name__ == "__main__":

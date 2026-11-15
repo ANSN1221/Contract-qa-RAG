@@ -1,6 +1,7 @@
 """根据 data/raw 下的实际文件生成 document-register.csv。
 
 指标全部来自真实测量（页数、可抽取字符数、低文本页数），不手填。
+扫描件判定与 ParseResult.is_scanned 共用同一组常量，避免两处口径漂移。
 """
 from __future__ import annotations
 
@@ -11,17 +12,19 @@ from pathlib import Path
 
 import pymupdf
 
+from contract_qa.models import SCANNED_LOW_TEXT_RATIO, SCANNED_MIN_TOTAL_CHARS
+from contract_qa.text import LOW_TEXT_THRESHOLD
+
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
 REGISTER = ROOT / "data" / "document-register.csv"
 
-LOW_TEXT_THRESHOLD = 20  # 单页可抽取字符数低于此值视为无文本页
-
 
 def load_sources():
-    spec = importlib.util.spec_from_file_location(
-        "fetch_docs", ROOT / "scripts" / "fetch_public_documents.py"
-    )
+    script = ROOT / "scripts" / "fetch_public_documents.py"
+    spec = importlib.util.spec_from_file_location("fetch_docs", script)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"无法加载下载脚本：{script}")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["fetch_docs"] = mod
     spec.loader.exec_module(mod)
@@ -51,7 +54,10 @@ def build_rows() -> list[dict[str, str]]:
         if not path.exists():
             raise SystemExit(f"缺少文件：{path}")
         pages, chars, low_text_pages = measure(path)
-        scanned = chars < 200
+        # 与 models.ParseResult.is_scanned 保持同一套规则
+        scanned = (
+            low_text_pages / pages >= SCANNED_LOW_TEXT_RATIO if pages else True
+        ) or chars < SCANNED_MIN_TOTAL_CHARS
         if scanned:
             status = "scan_only"
             note = f"纯扫描件，可抽取字符 {chars}；保留为解析失败样本"

@@ -101,12 +101,13 @@ def split_recursive(text: str, starts: list[int]) -> list[Chunk]:
 
 def load_own(doc_id: str) -> list[Chunk]:
     """本项目方案：读已切好的条款。"""
+    from contract_qa.index import read_clause_rows
+
     path = PROCESSED / f"{doc_id}.jsonl"
+    if not path.exists():
+        return []
     chunks: list[Chunk] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        row = json.loads(line)
+    for row in read_clause_rows(path):
         chunks.append(
             Chunk(
                 text=row["text"],
@@ -151,6 +152,9 @@ def main() -> int:
 
         rs = summarize(recursive, pages_text)
         os_ = summarize(own, pages_text)
+        if not rs or not os_:
+            print(f"{doc['doc_id']}  有一侧没有切出内容，跳过（源文件可能缺失或损坏）")
+            continue
         rows.append(
             {
                 "doc": doc["doc_id"],

@@ -6,6 +6,10 @@
 加 D6 的 verify 节点只需要多插一条边。
 
 本文件只负责编排，具体检索与调用都在 retrieval / llm 里。
+
+降级约定：「模型判不出来」与「接口调用失败」是两件事。
+前者走内容级兜底（放行、退回原句），后者走节点级降级并记入 node_errors，
+任何一步失败都不应该让整条链路抛栈。
 """
 
 from __future__ import annotations
@@ -19,8 +23,8 @@ import structlog
 from langgraph.graph import END, StateGraph
 
 from contract_qa.config import Settings, get_settings
-from contract_qa.llm import chat
-from contract_qa.retrieval import Hit, Retriever, get_retriever
+from contract_qa.llm import ApiError, chat
+from contract_qa.retrieval import Hit, Retriever, get_retriever, reset_retriever
 
 log = structlog.get_logger("contract_qa.graph")
 
@@ -30,15 +34,19 @@ GENERATE_RETRIES = 1     # malformed 只重试一次，附上错误信息
 
 class QAState(TypedDict, total=False):
     question: str
+    top_k: int
+    use_rerank: bool
     route: str
     route_reason: str
     queries: list[str]
+    # hits 存 dict 而不是 Hit 对象：状态需要可序列化，跨检查点不会丢字段
     hits: list[dict]
     answer: str
     answerable: bool
     citation_ids: list[str]
     attempts: int
     error: str
+    node_errors: list[str]
     prompt_tokens: int
     completion_tokens: int
     timings: dict[str, float]
@@ -80,7 +88,11 @@ def map_citations(citation_ids: list[str], hits: list[Hit]) -> tuple[list[dict],
     by_id = {hit.clause_id: hit for hit in hits}
     citations: list[dict] = []
     violations: list[str] = []
+    seen: set[str] = set()
     for cid in citation_ids:
+        if cid in seen:
+            continue  # 模型重复给同一个 id 时只展示一次
+        seen.add(cid)
         hit = by_id.get(cid)
         if hit is None:
             violations.append(cid)
@@ -111,6 +123,9 @@ class GraphResult:
     citation_violations: list[str] = field(default_factory=list)
     attempts: int = 0
     error: str = ""
+    node_errors: list[str] = field(default_factory=list)
+    needs_review: bool = False
+    review_reasons: list[str] = field(default_factory=list)
     prompt_tokens: int = 0
     completion_tokens: int = 0
     timings: dict[str, float] = field(default_factory=dict)
@@ -127,6 +142,8 @@ def _parse_json(content: str) -> dict | None:
     但这属于可救的格式问题，不是内容问题。
     只接受对象：下游要按字段取值，数组或标量即使合法也用不了。
     """
+    if not isinstance(content, str) or not content.strip():
+        return None
     try:
         parsed = json.loads(content)
         return parsed if isinstance(parsed, dict) else None
@@ -141,6 +158,16 @@ def _parse_json(content: str) -> dict | None:
         return None
 
 
+def _timed(state: QAState, key: str, started: float) -> dict[str, float]:
+    timings = dict(state.get("timings", {}))
+    timings[key] = time.perf_counter() - started
+    return timings
+
+
+def _with_error(state: QAState, message: str) -> list[str]:
+    return [*state.get("node_errors", []), message]
+
+
 class QAGraph:
     def __init__(self, settings: Settings | None = None, retriever: Retriever | None = None):
         self.settings = settings or get_settings()
@@ -151,65 +178,82 @@ class QAGraph:
 
     def _route(self, state: QAState) -> QAState:
         started = time.perf_counter()
-        result = chat(
-            [
-                {"role": "system", "content": ROUTE_PROMPT},
-                {"role": "user", "content": state["question"]},
-            ],
-            self.settings,
-            json_mode=True,
-        )
+        try:
+            result = chat(
+                [
+                    {"role": "system", "content": ROUTE_PROMPT},
+                    {"role": "user", "content": state["question"]},
+                ],
+                self.settings,
+                json_mode=True,
+            )
+        except ApiError as exc:
+            # 调用失败也放行：宁可多查一次，不能让一次抖动让整条链路不可用
+            log.warning("route_api_error", error=str(exc))
+            return {
+                "route": "contract_qa",
+                "route_reason": f"路由调用失败，按合同域处理：{exc}",
+                "node_errors": _with_error(state, f"route: {exc}"),
+                "timings": _timed(state, "route", started),
+            }
         payload = _parse_json(result.content) or {}
         route = payload.get("route", "contract_qa")
         if route not in {"contract_qa", "out_of_scope"}:
             route = "contract_qa"  # 判不出来就放行，宁可多查一次
-        timings = dict(state.get("timings", {}))
-        timings["route"] = time.perf_counter() - started
         log.info("route", route=route, reason=payload.get("reason", ""))
         return {
             "route": route,
             "route_reason": str(payload.get("reason", "")),
             "prompt_tokens": state.get("prompt_tokens", 0) + result.prompt_tokens,
             "completion_tokens": state.get("completion_tokens", 0) + result.completion_tokens,
-            "timings": timings,
+            "timings": _timed(state, "route", started),
         }
 
     def _rewrite(self, state: QAState) -> QAState:
         started = time.perf_counter()
-        result = chat(
-            [
-                {"role": "system", "content": REWRITE_PROMPT},
-                {"role": "user", "content": state["question"]},
-            ],
-            self.settings,
-            json_mode=True,
-        )
+        try:
+            result = chat(
+                [
+                    {"role": "system", "content": REWRITE_PROMPT},
+                    {"role": "user", "content": state["question"]},
+                ],
+                self.settings,
+                json_mode=True,
+            )
+        except ApiError as exc:
+            log.warning("rewrite_api_error", error=str(exc))
+            return {
+                "queries": [state["question"]],  # 调用失败同样退回原句，不阻断链路
+                "node_errors": _with_error(state, f"rewrite: {exc}"),
+                "timings": _timed(state, "rewrite", started),
+            }
         payload = _parse_json(result.content) or {}
         queries = [q.strip() for q in payload.get("queries", []) if str(q).strip()]
         if not queries:
             queries = [state["question"]]  # 改写失败就退回原句，不阻断链路
-        timings = dict(state.get("timings", {}))
-        timings["rewrite"] = time.perf_counter() - started
         log.info("rewrite", queries=queries)
         return {
             "queries": queries[:MAX_QUERIES],
             "prompt_tokens": state.get("prompt_tokens", 0) + result.prompt_tokens,
             "completion_tokens": state.get("completion_tokens", 0) + result.completion_tokens,
-            "timings": timings,
+            "timings": _timed(state, "rewrite", started),
         }
 
     def _retrieve(self, state: QAState) -> QAState:
         started = time.perf_counter()
+        top_k = int(state.get("top_k") or 8)
         merged: dict[str, Hit] = {}
+        use_rerank = state.get("use_rerank")
         for query in state.get("queries", [state["question"]]):
-            for hit in self.retriever.search(query, top_k=8):
-                # 同一条款被多个子查询命中时保留更高分的那次
-                if hit.clause_id not in merged or hit.score > merged[hit.clause_id].score:
+            for hit in self.retriever.search(query, top_k=top_k, use_rerank=use_rerank):
+                # 同一条款被多个子查询命中时保留排序更靠前的那次
+                if (
+                    hit.clause_id not in merged
+                    or hit.sort_key > merged[hit.clause_id].sort_key
+                ):
                     merged[hit.clause_id] = hit
-        hits = sorted(merged.values(), key=lambda h: h.score, reverse=True)[:8]
-        timings = dict(state.get("timings", {}))
-        timings["retrieve"] = time.perf_counter() - started
-        log.info("retrieve", merged=len(merged), kept=len(hits))
+        hits = sorted(merged.values(), key=lambda h: h.sort_key, reverse=True)[:top_k]
+        log.info("retrieve", merged=len(merged), kept=len(hits), top_k=top_k)
         return {
             "hits": [
                 {
@@ -217,10 +261,11 @@ class QAGraph:
                     "score": h.score,
                     "dense_rank": h.dense_rank,
                     "bm25_rank": h.bm25_rank,
+                    "rerank_score": h.rerank_score,
                 }
                 for h in hits
             ],
-            "timings": timings,
+            "timings": _timed(state, "retrieve", started),
         }
 
     def _format_candidates(self, hits: list[Hit]) -> str:
@@ -252,11 +297,19 @@ class QAGraph:
         prompt_tokens = state.get("prompt_tokens", 0)
         completion_tokens = state.get("completion_tokens", 0)
         error = ""
+        failure = "parse"
         payload: dict | None = None
 
         while attempts <= GENERATE_RETRIES:
             attempts += 1
-            result = chat(messages, self.settings, json_mode=True)
+            try:
+                result = chat(messages, self.settings, json_mode=True)
+            except ApiError as exc:
+                # llm 内部已按可重试性退避过，这里直接降级，不再叠加重试
+                failure = "api"
+                error = f"生成调用失败：{exc}"
+                log.warning("generate_api_error", attempt=attempts, error=str(exc))
+                break
             prompt_tokens += result.prompt_tokens
             completion_tokens += result.completion_tokens
             payload = _parse_json(result.content)
@@ -265,20 +318,30 @@ class QAGraph:
             error = f"输出不是合法 JSON：{result.content[:160]}"
             log.warning("generate_malformed", attempt=attempts, preview=result.content[:120])
             if attempts <= GENERATE_RETRIES:
-                messages = [*messages, {"role": "user",
-                                        "content": "上一条输出不是合法 JSON。"
-                                                   "只输出 JSON 对象，不要任何解释文字。"}]
+                # 把上一轮的 malformed 输出也放回对话：角色交替，模型才知道自己错在哪
+                messages = [
+                    *messages,
+                    {"role": "assistant", "content": result.content},
+                    {"role": "user",
+                     "content": "上一条输出不是合法 JSON。"
+                                "只输出 JSON 对象，不要任何解释文字。"},
+                ]
 
-        timings = dict(state.get("timings", {}))
-        timings["generate"] = time.perf_counter() - started
+        timings = _timed(state, "generate", started)
 
         if payload is None:
+            answer = (
+                "生成调用失败，已按降级处理。"
+                if failure == "api"
+                else "模型输出解析失败，已重试一次。"
+            )
             return {
-                "answer": "模型输出解析失败，已重试一次。",
+                "answer": answer,
                 "answerable": False,
                 "citation_ids": [],
                 "attempts": attempts,
                 "error": error,
+                "node_errors": _with_error(state, f"generate: {error}"),
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
                 "timings": timings,
@@ -307,6 +370,7 @@ class QAGraph:
                     dense_rank=item.get("dense_rank"),
                     bm25_rank=item.get("bm25_rank"),
                     record=record,
+                    rerank_score=item.get("rerank_score"),
                 )
             )
         return out
@@ -333,8 +397,8 @@ class QAGraph:
 
     # ---------- 对外 ----------
 
-    def ask(self, question: str) -> GraphResult:
-        state = self.app.invoke({"question": question})
+    def ask(self, question: str, top_k: int = 8) -> GraphResult:
+        state = self.app.invoke({"question": question, "top_k": top_k})
         hits = self._hits_from_state(state)
         citations, violations = map_citations(state.get("citation_ids", []), hits)
 
@@ -350,13 +414,27 @@ class QAGraph:
             citation_violations=violations,
             attempts=state.get("attempts", 0),
             error=state.get("error", ""),
+            node_errors=state.get("node_errors", []),
             prompt_tokens=state.get("prompt_tokens", 0),
             completion_tokens=state.get("completion_tokens", 0),
             timings=state.get("timings", {}),
         )
         if result.route == "out_of_scope":
             result.answer = "这个问题不需要查阅合同条款，超出本工具范围。"
+        result.needs_review, result.review_reasons = self._review(result)
         return result
+
+    @staticmethod
+    def _review(result: GraphResult) -> tuple[bool, list[str]]:
+        """引用一致性后置校验：不篡改模型答案，但绝不静默放过。"""
+        reasons: list[str] = []
+        if result.citation_violations:
+            reasons.append(f"模型给出了候选之外的引用：{result.citation_violations}")
+        if result.answerable and not result.citations:
+            reasons.append("标记为可答，但没有任何可核对的引用")
+        if not result.answerable and result.citations:
+            reasons.append("标记为不可答，却仍给出了引用")
+        return bool(reasons), reasons
 
 
 _graph: QAGraph | None = None
@@ -367,3 +445,10 @@ def get_graph() -> QAGraph:
     if _graph is None:
         _graph = QAGraph()
     return _graph
+
+
+def reset_graph() -> None:
+    """重建索引或改配置后调用，同时清掉检索器缓存。"""
+    global _graph
+    _graph = None
+    reset_retriever()
