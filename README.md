@@ -6,9 +6,9 @@
 和常见的 RAG demo 差别在三点：切分以条款为最小单位（不是按字数切）、
 检索用 BM25 + 向量双路加权融合（不是只用向量）、引用带页码可翻页验证（不是只报文件名）。
 
-> 关于命名的坦白：仓库名带 Agent，但当前实现是**固定的四节点链路**，
+> 关于命名的坦白：仓库名带 Agent，但当前实现是**固定的五节点链路**，
 > 模型没有工具调用与自主决策，严格说属于 RAG pipeline 而非 Agent。
-> 等 D6 加上 verify 回退与工具调用后再改口。
+> verify 回退已具备，工具调用还没有，所以仍不改口。
 
 ## 当前状态
 
@@ -25,7 +25,15 @@
 ② rerank 四轮零召回增益，只能重排池内条款；③ 四道边界题（同构表格、表格碎片、标题正文被切断），
 需字段级结构化抽取才能解决。数据见 `docs/eval-d5.md`，分析见 `docs/d5-findings.md`。重排默认关闭。
 
-进度：D1 骨架 ✓ · D2 解析与切分 ✓ · D3 索引与检索 ✓ · D4 四节点主链路 ✓ · D5 检索评测 ✓
+**D6：引用校验与回退。** 生成后加 verify 节点：先跑零成本规则校验（可答却没引用、
+引用不在候选里、答案为空），再让模型核对答案是否被引用条款支持。
+不通过带上问题说明回退重生成，最多 2 轮；校验接口本身失败时放行并记入 node_errors。
+冒烟 3 题：2 题可答且引用正确、1 题正确拒答，均一次通过，可答题均耗时约 5.3 秒
+（verify 的模型校验约 1 秒，拒答题不触发模型校验）。
+记录见 `docs/d6-smoke.md`。
+
+进度：D1 骨架 ✓ · D2 解析与切分 ✓ · D3 索引与检索 ✓ · D4 四节点主链路 ✓
+· D5 检索评测 ✓ · D6 引用校验 ✓
 
 ## 文档
 
@@ -35,7 +43,8 @@
 | [docs/problems/](docs/problems/) | D1–D3 的 16 个真实卡点：现象、原因、处理、教训（PDF） |
 | [docs/parse-acceptance.md](docs/parse-acceptance.md) | 解析与切分的抽样验收（766 条条款、页码命中 94.0%） |
 | [docs/splitter-comparison.md](docs/splitter-comparison.md) | 现成切分工具与本项目切分器的对照数据 |
-| [docs/smoke.md](docs/smoke.md) | 冒烟记录（6 题、路由、改写查询、耗时、token） |
+| [docs/smoke.md](docs/smoke.md) | D4 冒烟记录（6 题、路由、改写查询、耗时、token） |
+| [docs/d6-smoke.md](docs/d6-smoke.md) | D6 冒烟记录（verify 轮次、引用、耗时拆解、未覆盖路径） |
 | [docs/eval-d5.md](docs/eval-d5.md) | D5 检索评测：四组对照、逐题名次、权重扫描、耗时 |
 | [docs/d5-findings.md](docs/d5-findings.md) | D5 结论：RRF 压制阈值、rerank 边界、样本量限制 |
 | [docs/mvp-scope.md](docs/mvp-scope.md) | 范围边界：做什么、不做什么、为什么 |
@@ -107,7 +116,7 @@ src/contract_qa/
   parse.py          解析编排与 JSONL 输出
   index.py          BM25 与 Chroma 向量索引
   retrieval.py      双路召回 + 加权 RRF 融合
-  graph.py          四节点状态机（route/rewrite/retrieve/generate）
+  graph.py          五节点状态机（route/rewrite/retrieve/generate/verify）
   llm.py            OpenAI 兼容客户端（向量化 + 对话）
   config.py         .env 加载与配置聚合（密钥、路径、检索权重）
   cli.py            命令行入口
@@ -145,17 +154,22 @@ BM25 第 20 名压制到融合第 21 名）。向量负责语义泛化，关键�
 Recall@5、引用正确率、不可答硬答率、P95 延迟与成本只记录实测结果。
 计划书中的数字仅是示例，不得直接写入简历或 README。
 
-## 下一步：D6
+## 下一步
 
-D6 加 verify 节点做引用校验与最多 2 轮回退。
+D6 已完成（verify 节点）。下一步二选一：
+- **结构化抽取**：PDF 表格重建（`find_tables`）+ 子合同分段，修 D5 的四道边界题
+- **工具调用**：把检索/比对/翻页做成可调工具，才够得上「Agent」这个词
 
 D5 留下的待办：
-- 四道边界题（Q20/Q24/Q34/Q43）留给字段级结构化抽取与表格重建里程碑
+- 四道边界题（Q20/Q24/Q34/Q43）已证实字段级切分无效（两次实验均低 6 个百分点），需更靠前的结构化处理
 - rerank 待召回进一步修好后再复评
-当前基线：766 条条款、冒烟 6 题中 4 题可答、2 题正确拒答、平均 3.65 秒、单题约 3.6k tokens。
+
+当前基线：766 条条款、检索 Recall@5 88%（混合 1:1）、D6 冒烟 3 题（2 可答 / 1 正确拒答）。
+可答题端到端约 5.3 秒，其中 verify 的模型校验约 1 秒。
 
 链路从 D3 的单次检索变成四节点后，平均耗时从 1.84 秒升到 3.65 秒——多出来的两次 LLM 调用
 （route 与 rewrite）换来的是：无关问题 1.15 秒直接短路不检索、复合问题能拆成两问分别召回。
+D6 再加一次 verify 调用，可答题约再多 1 秒，换的是引用可核对。
 
 ## License
 

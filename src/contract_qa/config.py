@@ -125,6 +125,8 @@ class Settings:
     rerank_api_key: str = ""
     rerank_base_url: str = ""
     rerank_candidates: int = 16
+    # 引用校验是否调用模型核对答案与条款的一致性（关闭后只跑规则校验）
+    verify_llm: bool = True
 
     @property
     def has_llm(self) -> bool:
@@ -163,4 +165,5 @@ def get_settings() -> Settings:
         rerank_api_key=rerank_key,
         rerank_base_url=rerank_base,
         rerank_candidates=_env_int("RERANK_CANDIDATES", 16, minimum=1),
+        verify_llm=_env_bool("VERIFY_LLM", True),
     )

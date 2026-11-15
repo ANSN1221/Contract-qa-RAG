@@ -30,6 +30,7 @@ log = structlog.get_logger("contract_qa.graph")
 
 MAX_QUERIES = 3          # 复合问题最多拆 3 个子查询，再多就超出上下文预算
 GENERATE_RETRIES = 1     # malformed 只重试一次，附上错误信息
+MAX_VERIFY_ROUNDS = 2    # 引用校验不通过时最多回退 2 轮，避免无限重生成
 
 
 class QAState(TypedDict, total=False):
@@ -50,6 +51,11 @@ class QAState(TypedDict, total=False):
     prompt_tokens: int
     completion_tokens: int
     timings: dict[str, float]
+    # verify 节点：轮次、未通过原因、回退给 generate 的修改建议
+    verify_rounds: int
+    verify_problems: list[str]
+    verify_feedback: str
+    verify_error: str
 
 
 ROUTE_PROMPT = """判断用户问题是否需要查阅合同条款才能回答。
@@ -60,6 +66,9 @@ ROUTE_PROMPT = """判断用户问题是否需要查阅合同条款才能回答�
 route 取值：
 - contract_qa：问的是合同/招标文件里的内容（金额、期限、责任、程序、标准等），需要查条款
 - out_of_scope：闲聊、与合同无关的通用问题、要求你做条款之外的判断（如"这份合同合不合法"）
+
+注意：只要问题在问某份文件里的具体事实（金额、周期、比例、人数、地点、编号、名称），
+即使听起来像通用行业常识，也走 contract_qa——本工具手上有真实文件，能查到就不能推给"常识"。
 """
 
 REWRITE_PROMPT = """把用户问题改写成适合条款检索的查询。
@@ -79,8 +88,20 @@ GENERATE_PROMPT = """你是合同审查助手。只能依据给定的条款片�
 3. 回答里每个事实都必须能在 citations 指向的片段中找到原文依据。
 4. 若条款明确说明某事项不适用、不收取、无需提供、已免除，直接说明结论并引用，
    不要因为「问题问金额而条款没给金额」就判为不可回答。
-5. 只输出 JSON：{"answer": "……", "citations": ["条款ID"], "answerable": true}
+5. 用词不同不等于没有依据：问题里的「设备总价款」「货款」与条款里的「合同总价」
+   「价款」是同义表述，先对齐术语再判断片段是否够用；答案里可以注明条款的原始说法。
+6. 只输出 JSON：{"answer": "……", "citations": ["条款ID"], "answerable": true}
 """
+
+VERIFY_PROMPT = """核对答案是否被引用条款支持。
+
+规则：
+1. 逐条检查答案里的每个事实，看能否在引用条款原文中找到依据。
+2. 条款里没写的，就是没有依据，不要用常识或行业惯例替它补。
+3. 答案与引用条款矛盾时判为不支持。
+4. 只输出 JSON：
+{"supported": true, "problems": [], "fix_hint": ""}
+不支持时 problems 每条写一个具体问题，fix_hint 写一句怎么改（如「删除第 2 句」「改引用到 XX」）。"""
 
 
 def map_citations(citation_ids: list[str], hits: list[Hit]) -> tuple[list[dict], list[str]]:
@@ -126,6 +147,8 @@ class GraphResult:
     node_errors: list[str] = field(default_factory=list)
     needs_review: bool = False
     review_reasons: list[str] = field(default_factory=list)
+    verify_rounds: int = 0
+    verify_problems: list[str] = field(default_factory=list)
     prompt_tokens: int = 0
     completion_tokens: int = 0
     timings: dict[str, float] = field(default_factory=dict)
@@ -288,9 +311,14 @@ class QAGraph:
             return {"answer": "未检索到相关条款。", "answerable": False, "citation_ids": []}
 
         candidates = self._format_candidates(hits)
+        user_content = f"条款片段：\n\n{candidates}\n\n问题：{state['question']}"
+        feedback = state.get("verify_feedback", "")
+        if feedback:
+            # 回退重生成时把上一轮的不通过原因带上，否则模型只会重复同样的答案
+            user_content += f"\n\n上一轮输出未通过引用校验，请逐条修正：\n{feedback}"
         messages = [
             {"role": "system", "content": GENERATE_PROMPT},
-            {"role": "user", "content": f"条款片段：\n\n{candidates}\n\n问题：{state['question']}"},
+            {"role": "user", "content": user_content},
         ]
 
         attempts = 0
@@ -357,6 +385,82 @@ class QAGraph:
             "timings": timings,
         }
 
+    def _verify(self, state: QAState) -> QAState:
+        """引用校验：先做零成本规则检查，再让模型核对答案是否被条款支持。
+
+        规则层抓结构性错误（可答却没引用、引用不在候选里），
+        模型层抓内容性错误（答案里有条款没写的推断）。
+        任一不通过就回退重生成；校验接口本身失败时放行并记 node_errors，
+        不能因为「校验不了」就把正确答案一起废掉。
+        """
+        started = time.perf_counter()
+        hits = self._hits_from_state(state)
+        by_id = {hit.clause_id: hit for hit in hits}
+        answer = state.get("answer", "").strip()
+        answerable = bool(state.get("answerable", False))
+        citation_ids = state.get("citation_ids", [])
+        rounds = int(state.get("verify_rounds", 0))
+
+        problems: list[str] = []
+        if answerable and not citation_ids:
+            problems.append("标记为可答，但没有任何引用")
+        if not answerable and citation_ids:
+            problems.append("标记为不可答，却给出了引用")
+        unknown = [cid for cid in citation_ids if cid not in by_id]
+        if unknown:
+            problems.append(f"引用了候选之外的条款：{unknown}")
+        if answerable and not answer:
+            problems.append("标记为可答，但答案为空")
+
+        prompt_tokens = state.get("prompt_tokens", 0)
+        completion_tokens = state.get("completion_tokens", 0)
+        verify_error = ""
+        feedback = ""
+
+        # 规则层已不通过时不必再花一次模型调用
+        if not problems and answerable and self.settings.verify_llm:
+            cited = "\n\n".join(
+                f"[{cid}] {by_id[cid].record.text}" for cid in citation_ids if cid in by_id
+            )
+            messages = [
+                {"role": "system", "content": VERIFY_PROMPT},
+                {"role": "user", "content": f"引用条款：\n\n{cited}\n\n待核对答案：\n{answer}"},
+            ]
+            try:
+                result = chat(messages, self.settings, json_mode=True)
+                prompt_tokens += result.prompt_tokens
+                completion_tokens += result.completion_tokens
+                payload = _parse_json(result.content)
+                if payload is None:
+                    verify_error = f"校验输出不是合法 JSON：{result.content[:120]}"
+                elif not bool(payload.get("supported", True)):
+                    problems.extend(
+                        str(item) for item in payload.get("problems", []) if str(item).strip()
+                    )
+                    feedback = str(payload.get("fix_hint", "")).strip()
+                    if not problems:
+                        problems.append("模型判定答案未被引用条款支持")
+            except ApiError as exc:
+                verify_error = f"校验调用失败：{exc}"
+                log.warning("verify_api_error", error=str(exc))
+
+        node_errors = state.get("node_errors", [])
+        if verify_error:
+            node_errors = _with_error(state, f"verify: {verify_error}")
+        timings = _timed(state, "verify", started)
+        passed = not problems
+        log.info("verify", passed=passed, round=rounds + 1, problems=len(problems))
+        return {
+            "verify_rounds": rounds + 1,
+            "verify_problems": problems,
+            "verify_feedback": feedback or "；".join(problems),
+            "verify_error": verify_error,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "node_errors": node_errors,
+            "timings": timings,
+        }
+
     def _hits_from_state(self, state: QAState) -> list[Hit]:
         out = []
         for item in state.get("hits", []):
@@ -383,6 +487,7 @@ class QAGraph:
         graph.add_node("rewrite", self._rewrite)
         graph.add_node("retrieve", self._retrieve)
         graph.add_node("generate", self._generate)
+        graph.add_node("verify", self._verify)
 
         graph.set_entry_point("route")
         graph.add_conditional_edges(
@@ -392,7 +497,17 @@ class QAGraph:
         )
         graph.add_edge("rewrite", "retrieve")
         graph.add_edge("retrieve", "generate")
-        graph.add_edge("generate", END)
+        graph.add_edge("generate", "verify")
+        graph.add_conditional_edges(
+            "verify",
+            lambda state: (
+                "generate"
+                if state.get("verify_problems")
+                and state.get("verify_rounds", 0) <= MAX_VERIFY_ROUNDS
+                else END
+            ),
+            {"generate": "generate", END: END},
+        )
         return graph.compile()
 
     # ---------- 对外 ----------
@@ -415,6 +530,8 @@ class QAGraph:
             attempts=state.get("attempts", 0),
             error=state.get("error", ""),
             node_errors=state.get("node_errors", []),
+            verify_rounds=state.get("verify_rounds", 0),
+            verify_problems=state.get("verify_problems", []),
             prompt_tokens=state.get("prompt_tokens", 0),
             completion_tokens=state.get("completion_tokens", 0),
             timings=state.get("timings", {}),
@@ -434,6 +551,9 @@ class QAGraph:
             reasons.append("标记为可答，但没有任何可核对的引用")
         if not result.answerable and result.citations:
             reasons.append("标记为不可答，却仍给出了引用")
+        if result.verify_problems:
+            # 重试到上限仍未通过，答案照给但必须标出来
+            reasons.extend(f"引用校验未通过：{item}" for item in result.verify_problems)
         return bool(reasons), reasons
 
 

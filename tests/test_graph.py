@@ -160,5 +160,133 @@ class ReviewTest(unittest.TestCase):
         self.assertTrue(needs)
 
 
+class _FixedRetriever:
+    """固定返回一条候选，让 verify 能按 id 找到条款。"""
+
+    def __init__(self) -> None:
+        hit = fake_hit("DOC001-C0001")
+        self.records = {"DOC001-C0001": hit.record}
+
+    def search(self, query: str, top_k: int = 8, *, use_rerank: bool | None = None):
+        return [fake_hit("DOC001-C0001")]
+
+
+class _Reply:
+    def __init__(self, content: str) -> None:
+        self.content = content
+        self.prompt_tokens = 10
+        self.completion_tokens = 5
+
+
+class VerifyNodeTest(unittest.TestCase):
+    """verify 节点：规则校验、模型校验、最多 2 轮回退、接口失败降级。"""
+
+    def _ask(self, generate_seq, verify_seq=None, verify_llm=True):
+        generate_seq = list(generate_seq)
+        verify_seq = list(verify_seq or [])
+
+        def fake_chat(messages, settings=None, **kwargs):
+            system = messages[0]["content"]
+            if system.startswith("判断用户问题"):
+                return _Reply('{"route": "contract_qa", "reason": "t"}')
+            if system.startswith("把用户问题改写"):
+                return _Reply('{"queries": ["付款方式"]}')
+            if system.startswith("你是合同审查助手"):
+                return _Reply(generate_seq.pop(0))
+            if system.startswith("核对答案"):
+                return _Reply(verify_seq.pop(0))
+            raise AssertionError(f"未预期的 system prompt：{system[:30]}")
+
+        settings = mock.Mock()
+        settings.has_llm = True
+        settings.verify_llm = verify_llm
+        with mock.patch("contract_qa.graph.chat", side_effect=fake_chat):
+            graph = QAGraph(settings=settings, retriever=_FixedRetriever())
+            return graph.ask("付款方式是什么？")
+
+    def test_answer_without_citation_retries_once(self):
+        result = self._ask(
+            [
+                '{"answer": "分三次付款", "citations": [], "answerable": true}',
+                '{"answer": "分三次付款", "citations": ["DOC001-C0001"], "answerable": true}',
+            ],
+            ['{"supported": true, "problems": [], "fix_hint": ""}'],
+        )
+        # 第一轮被规则层拦下（没有引用），第二轮通过
+        self.assertEqual(result.verify_rounds, 2)
+        self.assertEqual([c["clause_id"] for c in result.citations], ["DOC001-C0001"])
+        self.assertFalse(result.needs_review)
+
+    def test_citation_outside_candidates_retries(self):
+        result = self._ask(
+            [
+                '{"answer": "分三次", "citations": ["DOC999-C0001"], "answerable": true}',
+                '{"answer": "分三次", "citations": ["DOC001-C0001"], "answerable": true}',
+            ],
+            ['{"supported": true, "problems": [], "fix_hint": ""}'],
+        )
+        self.assertEqual(result.verify_rounds, 2)
+        self.assertEqual(result.citation_violations, [])
+        self.assertFalse(result.needs_review)
+
+    def test_refusal_needs_no_verify_call(self):
+        # 拒答不调模型校验：verify_seq 为空，一旦被调用就会 IndexError
+        result = self._ask(
+            ['{"answer": "未在所给条款中找到依据", "citations": [], "answerable": false}']
+        )
+        self.assertEqual(result.verify_rounds, 1)
+        self.assertFalse(result.answerable)
+        self.assertFalse(result.needs_review)
+
+    def test_llm_rejects_then_passes(self):
+        result = self._ask(
+            [
+                '{"answer": "分三次付款", "citations": ["DOC001-C0001"], "answerable": true}',
+                '{"answer": "分三次付款，比例 30/50/20", '
+                '"citations": ["DOC001-C0001"], "answerable": true}',
+            ],
+            [
+                '{"supported": false, "problems": ["比例在条款里找不到"], "fix_hint": "删掉比例"}',
+                '{"supported": true, "problems": [], "fix_hint": ""}',
+            ],
+        )
+        self.assertEqual(result.verify_rounds, 2)
+        self.assertEqual(result.verify_problems, [])
+        self.assertFalse(result.needs_review)
+
+    def test_gives_up_after_two_rounds(self):
+        bad = '{"answer": "分三次付清", "citations": ["DOC001-C0001"], "answerable": true}'
+        reject = '{"supported": false, "problems": ["条款未约定次数"], "fix_hint": "改为不可答"}'
+        result = self._ask([bad, bad, bad], [reject, reject, reject])
+        # 第 3 次校验后达到上限，结束并标记人工复核
+        self.assertEqual(result.verify_rounds, 3)
+        self.assertTrue(result.needs_review)
+        self.assertTrue(any("引用校验未通过" in reason for reason in result.review_reasons))
+
+    def test_verify_api_error_degrades_without_blocking(self):
+        def fake_chat(messages, settings=None, **kwargs):
+            system = messages[0]["content"]
+            if system.startswith("判断用户问题"):
+                return _Reply('{"route": "contract_qa", "reason": "t"}')
+            if system.startswith("把用户问题改写"):
+                return _Reply('{"queries": ["付款方式"]}')
+            if system.startswith("你是合同审查助手"):
+                return _Reply(
+                    '{"answer": "分三次付款", "citations": ["DOC001-C0001"], "answerable": true}'
+                )
+            raise ApiError("timeout")
+
+        settings = mock.Mock()
+        settings.has_llm = True
+        settings.verify_llm = True
+        with mock.patch("contract_qa.graph.chat", side_effect=fake_chat):
+            graph = QAGraph(settings=settings, retriever=_FixedRetriever())
+            result = graph.ask("付款方式是什么？")
+        # 校验挂了要放行，但必须留下痕迹
+        self.assertTrue(result.answerable)
+        self.assertEqual(result.verify_rounds, 1)
+        self.assertTrue(any("verify" in error for error in result.node_errors))
+
+
 if __name__ == "__main__":
     unittest.main()
