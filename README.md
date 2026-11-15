@@ -45,6 +45,7 @@
 | [docs/splitter-comparison.md](docs/splitter-comparison.md) | 现成切分工具与本项目切分器的对照数据 |
 | [docs/smoke.md](docs/smoke.md) | D4 冒烟记录（6 题、路由、改写查询、耗时、token） |
 | [docs/d6-smoke.md](docs/d6-smoke.md) | D6 冒烟记录（verify 轮次、引用、耗时拆解、未覆盖路径） |
+| [docs/d6-verify-overview.pdf](docs/d6-verify-overview.pdf) | D6 说明文档（PDF）：链路位置、三类错误、两层校验、回退与代价 |
 | [docs/eval-d5.md](docs/eval-d5.md) | D5 检索评测：四组对照、逐题名次、权重扫描、耗时 |
 | [docs/d5-findings.md](docs/d5-findings.md) | D5 结论：RRF 压制阈值、rerank 边界、样本量限制 |
 | [docs/mvp-scope.md](docs/mvp-scope.md) | 范围边界：做什么、不做什么、为什么 |
