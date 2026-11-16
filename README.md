@@ -139,6 +139,7 @@ uv run streamlit run src/contract_qa/app.py
 | [docs/eval-e2e.md](docs/eval-e2e.md) | E1 端到端评测：答案正确率、引用命中、拒答准确率、verify 触发、逐题明细 |
 | [docs/eval-agent.md](docs/eval-agent.md) | E2 工具调用 Agent 评测：同批 50 题的对比数据与失败明细 |
 | [docs/project-summary.md](docs/project-summary.md) | 项目成果一页纸：问题、方案、实测指标、三次负结果与取舍（另有同名 PDF） |
+| [docs/resume-material.md](docs/resume-material.md) | 简历素材：项目条目、作品集描述、STAR 自述、追问预演（另有同名 PDF） |
 | [docs/eval-d5.md](docs/eval-d5.md) | D5 检索评测：四组对照、逐题名次、权重扫描、耗时 |
 | [docs/d5-findings.md](docs/d5-findings.md) | D5 结论：RRF 压制阈值、rerank 边界、样本量限制 |
 | [docs/mvp-scope.md](docs/mvp-scope.md) | 范围边界：做什么、不做什么、为什么 |
