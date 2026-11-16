@@ -42,6 +42,7 @@ src/contract_qa/
   llm.py            OpenAI 兼容客户端（向量化 + 对话）
   config.py         .env 加载与配置聚合
   cli.py            命令行入口
+  app.py            Streamlit 界面（提问、看答案、逐条核对引用）
 scripts/            数据获取、验收与冒烟测试
 tests/              自动化测试
 docs/               范围、设计与验收记录
@@ -58,7 +59,6 @@ data/processed/     条款、索引与产物（不入库）
 4. 命名：仓库名为 `Contract-qa-RAG`，两条路径并存——默认固定五节点链路（RAG pipeline），
    `--agent` 走工具调用（模型自主决定检索策略与交卷时机，够得上 Agent）。两者共用同一套引用校验，
    不要只改其中一条的校验逻辑。
-   等 D6 加上 verify 回退与工具调用后才可改称 Agent。
 5. `BM25_WEIGHT=1.0 / DENSE_WEIGHT=1.0`（1:1）是 D5 三轮评测的实测结论：
    权重比超过约 1.31（RRF k=60、召回深度 20）会压制单路命中的答案；调权重需重跑
    `scripts/evaluate_retrieval.py` 留数据；非法权重值必须直接报错而不是静默生效。
