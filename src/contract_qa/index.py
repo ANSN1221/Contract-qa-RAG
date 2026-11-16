@@ -61,6 +61,7 @@ class ClauseRecord:
     page_start: int
     page_end: int
     text: str
+    short_name: str = ""
 
     def metadata(self) -> dict[str, object]:
         return {
@@ -74,7 +75,8 @@ class ClauseRecord:
 
     @property
     def citation_label(self) -> str:
-        parts = [self.doc_id]
+        # 引用首段用友好短名，避免把 DOC002 这类内部编号暴露给模型与用户
+        parts = [self.short_name or self.doc_id]
         if self.chapter_path:
             parts.append(self.chapter_path[-1])
         if self.clause_no:
@@ -110,11 +112,13 @@ def load_records(settings: Settings | None = None) -> list[ClauseRecord]:
     settings = settings or get_settings()
     manifest_path = settings.processed_dir / "manifest.json"
     titles: dict[str, str] = {}
+    short_names: dict[str, str] = {}
     if manifest_path.exists():
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             for doc in manifest.get("documents", []):
                 titles[doc["doc_id"]] = doc.get("title", "")
+                short_names[doc["doc_id"]] = doc.get("short_name", "")
         except (json.JSONDecodeError, KeyError, TypeError) as exc:
             # 标题只影响展示，不应让检索整个不可用；但必须显式告警
             warnings.warn(f"manifest.json 解析失败，文档标题将留空：{exc}", stacklevel=2)
@@ -135,6 +139,7 @@ def load_records(settings: Settings | None = None) -> list[ClauseRecord]:
                     clause_id=clause_id,
                     doc_id=row["doc_id"],
                     doc_title=titles.get(row["doc_id"], ""),
+                    short_name=short_names.get(row["doc_id"], ""),
                     clause_no=row["clause_no"],
                     chapter_path=row["chapter_path"],
                     page_start=row["page_start"],

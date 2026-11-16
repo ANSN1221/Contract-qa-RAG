@@ -90,6 +90,7 @@ def run_parse(project_root: Path, out_dir: Path | None = None) -> dict[str, obje
         summary = result.summary()
         summary["document_type"] = row.get("document_type", "")
         summary["title"] = row.get("title", "")
+        summary["short_name"] = row.get("short_name", "")
         summary["status"] = row.get("status", "")
 
         if result.is_scanned:
