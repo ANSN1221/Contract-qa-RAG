@@ -15,7 +15,7 @@
 | `id` | Q01–Q50 |
 | `question` | 用真实用户口吻，不要照抄条款原文 |
 | `relevant_clause_ids` | 可多个；跨条款题填 2–3 个，命中任一即算召回成功；不可答题填 `[]` |
-| `category` | `fact`（事实，18 条）/ `cross`（跨条款，17 条）/ `unanswerable`（不可答，15 条） |
+| `category` | `fact`（事实，19 条）/ `cross`（跨条款，17 条）/ `unanswerable`（不可答，14 条） |
 
 ## 标注规则
 
