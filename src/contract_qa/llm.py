@@ -182,3 +182,81 @@ def chat(
         prompt_tokens=int(usage.get("prompt_tokens", 0) or 0),
         completion_tokens=int(usage.get("completion_tokens", 0) or 0),
     )
+
+
+@dataclass
+class ToolCall:
+    id: str
+    name: str
+    arguments: str  # 原始 JSON 字符串，由调用方解析并容错
+
+
+@dataclass
+class ToolChatResult:
+    content: str
+    tool_calls: list[ToolCall]
+    prompt_tokens: int
+    completion_tokens: int
+
+    @property
+    def total_tokens(self) -> int:
+        return self.prompt_tokens + self.completion_tokens
+
+
+def chat_with_tools(
+    messages: list[dict],
+    tools: list[dict],
+    settings: Settings | None = None,
+    *,
+    temperature: float = 0.0,
+) -> ToolChatResult:
+    """带工具定义的一次对话。返回内容与模型决定发起的工具调用。
+
+    只负责一次请求：循环、工具执行、终止判断都在上层，
+    这样工具实现与协议细节不会混在一起。
+    """
+    settings = settings or get_settings()
+    if not settings.has_llm:
+        raise ApiError("缺少 LLM_API_KEY", retryable=False)
+
+    payload: dict[str, object] = {
+        "model": settings.llm_model,
+        "messages": messages,
+        "temperature": temperature,
+        "tools": tools,
+        "tool_choice": "auto",
+    }
+    data = post_json(
+        f"{settings.llm_base_url}/chat/completions", payload, settings.llm_api_key
+    )
+    choices = data.get("choices")
+    if not isinstance(choices, list) or not choices:
+        raise ApiError("对话响应缺少 choices")
+    first = choices[0] if isinstance(choices[0], dict) else {}
+    message = first.get("message") or {}
+    content = message.get("content") or ""
+    if not isinstance(content, str):
+        content = str(content)
+
+    calls: list[ToolCall] = []
+    for raw in message.get("tool_calls") or []:
+        if not isinstance(raw, dict):
+            continue
+        function = raw.get("function") or {}
+        name = str(function.get("name") or "")
+        if not name:
+            continue
+        calls.append(
+            ToolCall(
+                id=str(raw.get("id") or ""),
+                name=name,
+                arguments=str(function.get("arguments") or "{}"),
+            )
+        )
+    usage = data.get("usage") or {}
+    return ToolChatResult(
+        content=content,
+        tool_calls=calls,
+        prompt_tokens=int(usage.get("prompt_tokens", 0) or 0),
+        completion_tokens=int(usage.get("completion_tokens", 0) or 0),
+    )

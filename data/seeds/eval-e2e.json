@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-15T23:53:46",
+  "generated_at": "2026-11-16T17:14:51",
   "rows": [
     {
       "id": "Q01",
@@ -294,11 +294,14 @@
     {
       "id": "Q12",
       "question": "合同签订日期是哪天？",
-      "category": "unanswerable",
+      "category": "fact",
       "answer": "未在所给条款中找到依据",
       "answerable": false,
       "citations": [],
-      "expected": [],
+      "expected": [
+        "DOC012-C0007-5",
+        "DOC014-C0007"
+      ],
       "verify_rounds": 1,
       "verify_problems": [],
       "needs_review": false,
@@ -601,15 +604,15 @@
     },
     {
       "id": "Q25",
-      "question": "OA 和信创终端的运维服务签到什么时候结束？",
+      "question": "OA 和信创终端的运维服务到什么时候结束？",
       "category": "cross",
-      "answer": "OA 办公系统运维服务和信创终端运维驻场服务（包1）的服务期限均为2026年4月1日至2026年12月31日，即到2026年12月31日结束。招标公告及投标人须知前附表中也载明包1服务期限为9个月。",
+      "answer": "根据招标文件，包1「OA 办公系统运维、信创终端运维驻场服务」的服务期限为9个月；其中第五章进一步明确，OA 办公系统软件运维服务和信创终端运维驻场服务的服务期限均为2026年4月1日至2026年12月31日。",
       "answerable": true,
       "citations": [
-        "DOC011-C0022-1",
-        "DOC011-C0023",
         "DOC011-C0003-2",
-        "DOC011-C0011-2"
+        "DOC011-C0011-2",
+        "DOC011-C0022-1",
+        "DOC011-C0023"
       ],
       "expected": [
         "DOC011-C0022-1",
@@ -619,8 +622,8 @@
       "verify_problems": [],
       "needs_review": false,
       "review_reasons": [],
-      "elapsed": 4.84,
-      "tokens": 4196,
+      "elapsed": 0,
+      "tokens": 4176,
       "error": "",
       "answer_hit": true,
       "cite_hit": true,

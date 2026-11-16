@@ -144,15 +144,22 @@ def run_index(rebuild: bool) -> int:
     return 0
 
 
-def run_ask(question: str, top_k: int, show_hits: bool) -> int:
+def run_ask(question: str, top_k: int, show_hits: bool, use_agent: bool = False) -> int:
     try:
-        from contract_qa.graph import get_graph
+        if use_agent:
+            from contract_qa.agent import get_agent
+
+            runner = get_agent()
+        else:
+            from contract_qa.graph import get_graph
+
+            runner = get_graph()
     except ImportError as exc:  # pragma: no cover
         print(f"失败：缺少依赖（{exc}）")
         return 1
 
     try:
-        result = get_graph().ask(question, top_k=top_k)
+        result = runner.ask(question, top_k=top_k)
     except FileNotFoundError as exc:
         print(f"失败：{exc}")
         return 1
@@ -212,6 +219,11 @@ def build_parser() -> argparse.ArgumentParser:
     ask_cmd = subparsers.add_parser("ask", help="提问并返回答案与引用")
     ask_cmd.add_argument("question", help="问题文本")
     ask_cmd.add_argument("--top-k", type=int, default=8, help="送入模型的条款数，默认 8")
+    ask_cmd.add_argument(
+        "--agent",
+        action="store_true",
+        help="改用工具调用 Agent（模型自己决定检索几次、读哪几条）",
+    )
     ask_cmd.add_argument("--show-hits", action="store_true", help="打印召回明细")
     return parser
 
@@ -226,7 +238,7 @@ def main() -> None:
     if args.command == "index":
         raise SystemExit(run_index(args.rebuild))
     if args.command == "ask":
-        raise SystemExit(run_ask(args.question, args.top_k, args.show_hits))
+        raise SystemExit(run_ask(args.question, args.top_k, args.show_hits, args.agent))
     parser.error(f"未知命令：{args.command}")
 
 

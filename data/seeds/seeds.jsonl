@@ -9,7 +9,7 @@
 {"id":"Q09","question":"地质大数据平台项目的预算和最高限价是多少？","relevant_clause_ids":["DOC003-C0003-1","DOC003-C0011-1","DOC003-C0011-2"],"category":"cross"}
 {"id":"Q10","question":"合同一共要签几份？","relevant_clause_ids":["DOC002-C0014","DOC009-C0036"],"category":"cross"}
 {"id":"Q11","question":"这份合同编号是多少？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q12","question":"合同签订日期是哪天？","relevant_clause_ids":[],"category":"unanswerable"}
+{"id": "Q12", "question": "合同签订日期是哪天？", "relevant_clause_ids": ["DOC012-C0007-5", "DOC014-C0007"], "category": "fact"}
 {"id":"Q13","question":"项目负责人的手机号是多少？","relevant_clause_ids":[],"category":"unanswerable"}
 {"id":"Q14","question":"代理机构反腐倡廉监督电话是多少？","relevant_clause_ids":["DOC003-C0011-5"],"category":"fact"}
 {"id":"Q15","question":"工程量清单包含哪些分项？","relevant_clause_ids":[],"category":"unanswerable"}
@@ -22,7 +22,7 @@
 {"id":"Q22","question":"疫苗采购合同要履行多久？","relevant_clause_ids":["DOC005-C0002-4","DOC005-C0015-1"],"category":"cross"}
 {"id":"Q23","question":"指挥中心运维项目各个包的服务期限分别是几个月？","relevant_clause_ids":["DOC011-C0003-2","DOC011-C0011-1","DOC011-C0011-2"],"category":"cross"}
 {"id":"Q24","question":"疫苗项目投标要交保证金吗？","relevant_clause_ids":["DOC005-C0009-6","DOC005-C0012-5"],"category":"cross"}
-{"id":"Q25","question":"OA 和信创终端的运维服务签到什么时候结束？","relevant_clause_ids":["DOC011-C0022-1","DOC011-C0023"],"category":"cross"}
+{"id": "Q25", "question": "OA 和信创终端的运维服务到什么时候结束？", "relevant_clause_ids": ["DOC011-C0022-1", "DOC011-C0023"], "category": "cross"}
 {"id":"Q26","question":"这个项目什么时候通过验收的？","relevant_clause_ids":[],"category":"unanswerable"}
 {"id":"Q27","question":"中标通知书是哪天发出来的？","relevant_clause_ids":[],"category":"unanswerable"}
 {"id":"Q28","question":"评标专家都有谁？","relevant_clause_ids":[],"category":"unanswerable"}

@@ -44,6 +44,7 @@ KEYS: dict[str, list[str]] = {
     "Q08": ["488", "425", "457"],
     "Q09": ["8510000", "851万", "851 万"],
     "Q10": ["六份"],
+    "Q12": ["2024年6月6", "2024 年6 月6"],
     "Q14": ["037165962573", "6596"],
     "Q15": [],
     "Q16": ["3天", "3 天"],
@@ -86,7 +87,22 @@ def load_seeds() -> list[dict]:
     return rows
 
 
-REFUSAL_MARKERS = ("未记载", "未包含", "未在所给条款", "无法确定", "没有具体", "未找到", "未提及")
+REFUSAL_MARKERS = (
+    "未记载",
+    "未包含",
+    "未在所给条款",
+    "无法确定",
+    "无法给出",
+    "没有具体",
+    "未找到",
+    "未提及",
+    "未列出",
+    "没有列出",
+    "没有直接写明",
+    "未填写",
+    "空白",
+    "未约定",
+)
 
 
 def judge(seed: dict, answer: str, answerable: bool, citations: list[dict]) -> dict:
@@ -125,6 +141,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="端到端评测")
     parser.add_argument("--limit", type=int, default=0, help="只跑前 N 题，用于校验判定")
     parser.add_argument("--out", type=Path, default=REPORT)
+    parser.add_argument("--detail", type=Path, default=DETAIL, help="逐题明细落盘位置")
+    parser.add_argument("--agent", action="store_true", help="改用工具调用 Agent 跑")
     parser.add_argument(
         "--reuse",
         type=Path,
@@ -155,15 +173,21 @@ def main() -> int:
             row["question"] = seed["question"]
         print(f"复用 {len(rows)} 条旧结果重判，未调用模型")
     else:
-        rows = []
-        graph = QAGraph()
-        rows = _run_cases(graph, seeds)
+        if args.agent:
+            from contract_qa.agent import ContractAgent
 
-    _write_report(rows, args.out)
+            runner = ContractAgent()
+            print("模式：工具调用 Agent")
+        else:
+            runner = QAGraph()
+            print("模式：固定五节点链路")
+        rows = _run_cases(runner, seeds)
+
+    _write_report(rows, args.out, args.detail)
     return 0
 
 
-def _run_cases(graph: QAGraph, seeds: list[dict]) -> list[dict]:
+def _run_cases(graph, seeds: list[dict]) -> list[dict]:
     rows: list[dict] = []
     for index, seed in enumerate(seeds, start=1):
         started = time.perf_counter()
@@ -219,7 +243,7 @@ def _run_cases(graph: QAGraph, seeds: list[dict]) -> list[dict]:
     return rows
 
 
-def _write_report(rows: list[dict], out: Path) -> None:
+def _write_report(rows: list[dict], out: Path, detail: Path) -> None:
     answerable = [r for r in rows if r["category"] != "unanswerable"]
     unanswerable = [r for r in rows if r["category"] == "unanswerable"]
     answer_hits = sum(1 for r in answerable if r["answer_hit"])
@@ -304,7 +328,7 @@ def _write_report(rows: list[dict], out: Path) -> None:
 
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    DETAIL.write_text(
+    detail.write_text(
         json.dumps(
             {"generated_at": datetime.now().isoformat(timespec="seconds"), "rows": rows},
             ensure_ascii=False,
