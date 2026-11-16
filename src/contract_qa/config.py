@@ -109,6 +109,20 @@ def _env_bool(name: str, default: bool) -> bool:
 
 
 @dataclass(frozen=True)
+class LLMProvider:
+    """一家 OpenAI 兼容的对话供应商。name 只用于日志与界面展示，不进请求体。"""
+
+    name: str
+    base_url: str
+    api_key: str
+    model: str
+
+    @property
+    def ready(self) -> bool:
+        return bool(self.api_key and self.base_url)
+
+
+@dataclass(frozen=True)
 class Settings:
     llm_api_key: str
     llm_base_url: str
@@ -127,9 +141,13 @@ class Settings:
     rerank_candidates: int = 16
     # 引用校验是否调用模型核对答案与条款的一致性（关闭后只跑规则校验）
     verify_llm: bool = True
+    # 主供应商在前，备用依次在后；接口失败时按顺序切换
+    llm_providers: tuple[LLMProvider, ...] = ()
 
     @property
     def has_llm(self) -> bool:
+        if self.llm_providers:
+            return any(provider.ready for provider in self.llm_providers)
         return bool(self.llm_api_key)
 
     @property
@@ -139,6 +157,41 @@ class Settings:
     @property
     def has_rerank(self) -> bool:
         return bool(self.rerank_api_key and self.rerank_base_url)
+
+
+def _read_llm_providers() -> tuple[LLMProvider, ...]:
+    """读取主供应商与备用供应商。
+
+    主：LLM_BASE_URL / LLM_API_KEY / LLM_MODEL
+    备：LLM_FALLBACK_BASE_URL / LLM_FALLBACK_API_KEY / LLM_FALLBACK_MODEL
+        需要第二家时用 LLM_FALLBACK_2_*，依此类推。
+    只留配了密钥的：写了 BASE_URL 却没给 key 的项直接跳过，避免调用时才报错。
+    """
+    providers: list[LLMProvider] = []
+    primary = LLMProvider(
+        name=os.environ.get("LLM_NAME", "primary"),
+        base_url=os.environ.get("LLM_BASE_URL", "https://api.deepseek.com/v1").rstrip("/"),
+        api_key=os.environ.get("LLM_API_KEY", ""),
+        model=os.environ.get("LLM_MODEL", "deepseek-chat"),
+    )
+    if primary.ready:
+        providers.append(primary)
+
+    for index in range(1, 6):
+        prefix = "LLM_FALLBACK" if index == 1 else f"LLM_FALLBACK_{index}"
+        base_url = os.environ.get(f"{prefix}_BASE_URL", "").rstrip("/")
+        api_key = os.environ.get(f"{prefix}_API_KEY", "")
+        if not base_url and not api_key:
+            continue
+        provider = LLMProvider(
+            name=os.environ.get(f"{prefix}_NAME", f"fallback-{index}"),
+            base_url=base_url or primary.base_url,
+            api_key=api_key,
+            model=os.environ.get(f"{prefix}_MODEL", primary.model),
+        )
+        if provider.ready:
+            providers.append(provider)
+    return tuple(providers)
 
 
 def get_settings() -> Settings:
@@ -166,4 +219,5 @@ def get_settings() -> Settings:
         rerank_base_url=rerank_base,
         rerank_candidates=_env_int("RERANK_CANDIDATES", 16, minimum=1),
         verify_llm=_env_bool("VERIFY_LLM", True),
+        llm_providers=_read_llm_providers(),
     )

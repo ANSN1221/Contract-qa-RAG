@@ -61,6 +61,10 @@ def run_check() -> int:
     env_exists = (PROJECT_ROOT / ".env").exists()
     print(f".env：{'已存在' if env_exists else '缺失，请复制 .env.example 后填入密钥'}")
     print(f"对话密钥：{'已配置' if settings.has_llm else '未配置（ask 会失败）'}")
+    if settings.llm_providers:
+        for index, provider in enumerate(settings.llm_providers):
+            role = "主" if index == 0 else f"备{index}"
+            print(f"  · {role} {provider.name}：{provider.model}")
     print(f"向量密钥：{'已配置' if settings.has_embedding else '未配置（向量索引会跳过）'}")
     bm25_path = settings.processed_dir / BM25_FILE
     legacy_path = settings.processed_dir / "bm25.pkl"

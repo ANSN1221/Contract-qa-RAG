@@ -13,7 +13,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 
-from contract_qa.config import Settings, get_settings
+from contract_qa.config import LLMProvider, Settings, get_settings
 
 TIMEOUT_SECONDS = 60
 MAX_RETRIES = 3
@@ -137,10 +137,64 @@ class ChatResult:
     content: str
     prompt_tokens: int
     completion_tokens: int
+    provider: str = ""
 
     @property
     def total_tokens(self) -> int:
         return self.prompt_tokens + self.completion_tokens
+
+
+def _provider_list(settings: Settings) -> list[LLMProvider]:
+    """可用供应商列表，主在前、备在后。
+
+    兼容旧调用与测试替身：没有 llm_providers 时退回单一 LLM_* 配置。
+    """
+    providers = list(getattr(settings, "llm_providers", ()) or ())
+    if providers:
+        return [provider for provider in providers if provider.ready]
+    return [
+        LLMProvider(
+            name="primary",
+            base_url=settings.llm_base_url,
+            api_key=settings.llm_api_key,
+            model=settings.llm_model,
+        )
+    ]
+
+
+def _post_chat(
+    messages: list[dict],
+    settings: Settings,
+    *,
+    temperature: float,
+    json_mode: bool = False,
+    tools: list[dict] | None = None,
+) -> tuple[dict, str]:
+    """按供应商顺序尝试一次对话，返回 (响应, 实际使用的供应商名)。
+
+    只对「接口失败」切换：401/402/429/5xx/超时。答案内容不合格不归这里管，
+    由上层按自己的重试策略处理，避免「换个模型再答一遍」把问题掩盖掉。
+    """
+    errors: list[str] = []
+    for provider in _provider_list(settings):
+        payload: dict[str, object] = {
+            "model": provider.model,
+            "messages": messages,
+            "temperature": temperature,
+        }
+        if json_mode:
+            payload["response_format"] = {"type": "json_object"}
+        if tools is not None:
+            payload["tools"] = tools
+            payload["tool_choice"] = "auto"
+        try:
+            data = post_json(
+                f"{provider.base_url}/chat/completions", payload, provider.api_key
+            )
+            return data, provider.name
+        except ApiError as exc:
+            errors.append(f"{provider.name}: {exc}")
+    raise ApiError("所有对话供应商均失败：" + "；".join(errors), retryable=False)
 
 
 def chat(
@@ -154,17 +208,7 @@ def chat(
     if not settings.has_llm:
         raise ApiError("缺少 LLM_API_KEY", retryable=False)
 
-    payload: dict[str, object] = {
-        "model": settings.llm_model,
-        "messages": messages,
-        "temperature": temperature,
-    }
-    if json_mode:
-        payload["response_format"] = {"type": "json_object"}
-
-    data = post_json(
-        f"{settings.llm_base_url}/chat/completions", payload, settings.llm_api_key
-    )
+    data, provider = _post_chat(messages, settings, temperature=temperature, json_mode=json_mode)
     choices = data.get("choices")
     if not isinstance(choices, list) or not choices:
         raise ApiError("对话响应缺少 choices")
@@ -181,6 +225,7 @@ def chat(
         content=content,
         prompt_tokens=int(usage.get("prompt_tokens", 0) or 0),
         completion_tokens=int(usage.get("completion_tokens", 0) or 0),
+        provider=provider,
     )
 
 
@@ -197,6 +242,7 @@ class ToolChatResult:
     tool_calls: list[ToolCall]
     prompt_tokens: int
     completion_tokens: int
+    provider: str = ""
 
     @property
     def total_tokens(self) -> int:
@@ -214,21 +260,14 @@ def chat_with_tools(
 
     只负责一次请求：循环、工具执行、终止判断都在上层，
     这样工具实现与协议细节不会混在一起。
+    注意：备用供应商未必支持 tools，切换后若返回空 tool_calls，
+    上层会按「模型直接作答」处理，不会死循环。
     """
     settings = settings or get_settings()
     if not settings.has_llm:
         raise ApiError("缺少 LLM_API_KEY", retryable=False)
 
-    payload: dict[str, object] = {
-        "model": settings.llm_model,
-        "messages": messages,
-        "temperature": temperature,
-        "tools": tools,
-        "tool_choice": "auto",
-    }
-    data = post_json(
-        f"{settings.llm_base_url}/chat/completions", payload, settings.llm_api_key
-    )
+    data, provider = _post_chat(messages, settings, temperature=temperature, tools=tools)
     choices = data.get("choices")
     if not isinstance(choices, list) or not choices:
         raise ApiError("对话响应缺少 choices")
@@ -259,4 +298,5 @@ def chat_with_tools(
         tool_calls=calls,
         prompt_tokens=int(usage.get("prompt_tokens", 0) or 0),
         completion_tokens=int(usage.get("completion_tokens", 0) or 0),
+        provider=provider,
     )

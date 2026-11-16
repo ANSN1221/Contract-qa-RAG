@@ -7,7 +7,7 @@
 
 - Python 3.11+，包管理用 **uv**（勿用 pip 手动装包）
 - LangGraph 状态机、Chroma 向量库、PyMuPDF、rank-bm25、Streamlit、structlog、pydantic v2
-- LLM：DeepSeek（`deepseek-chat`）；Embedding：硅基流动 `BAAI/bge-m3`（1024 维）
+- LLM：OpenAI 兼容接口，支持主备供应商自动切换（默认 DeepSeek `deepseek-chat`）；Embedding：硅基流动 `BAAI/bge-m3`（1024 维）
 - 构建：hatchling；布局：src layout（包在 `src/contract_qa`）
 
 ## 常用命令（Windows PowerShell 环境）
@@ -59,7 +59,9 @@ data/processed/     条款、索引与产物（不入库）
 4. 命名：仓库名为 `Contract-qa-RAG`，两条路径并存——默认固定五节点链路（RAG pipeline），
    `--agent` 走工具调用（模型自主决定检索策略与交卷时机，够得上 Agent）。两者共用同一套引用校验，
    不要只改其中一条的校验逻辑。
-5. `BM25_WEIGHT=1.0 / DENSE_WEIGHT=1.0`（1:1）是 D5 三轮评测的实测结论：
+5. 多供应商：只对「接口失败」切换（401/402/429/5xx/超时），内容质量问题不得靠换模型掩盖；
+   备用模型需支持 JSON，`--agent` 时还需支持 tools。
+6. `BM25_WEIGHT=1.0 / DENSE_WEIGHT=1.0`（1:1）是 D5 三轮评测的实测结论：
    权重比超过约 1.31（RRF k=60、召回深度 20）会压制单路命中的答案；调权重需重跑
    `scripts/evaluate_retrieval.py` 留数据；非法权重值必须直接报错而不是静默生效。
 

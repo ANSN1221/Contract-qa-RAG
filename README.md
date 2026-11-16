@@ -74,6 +74,23 @@ Agent 修好了固定链路的两道边界题（Q24 疫苗保证金、Q25 服务
 按 clause_id 读原文，把「一次召回定生死」的风险摊薄。代价是慢 65%、贵 4 倍。
 默认仍走固定链路，`--agent` 按需开启。数据见 `docs/eval-agent.md`。
 
+## 多供应商与降级
+
+对话接口支持主备供应商，主供应商接口失败时自动切换，不用改代码：
+
+```bash
+# .env
+LLM_API_KEY=...                      # 主
+LLM_FALLBACK_API_KEY=...             # 备（可再配 LLM_FALLBACK_2_*）
+LLM_FALLBACK_BASE_URL=https://api.siliconflow.cn/v1
+LLM_FALLBACK_MODEL=deepseek-ai/DeepSeek-V3
+```
+
+- 只对**接口失败**切换（401 密钥无效、402 余额不足、429 限流、5xx、超时）；
+  答案内容不合格不会触发换模型，避免把质量问题掩盖成「换一家再答」
+- 结果里记录实际使用的供应商名；`contract-qa check` 会列出主备配置
+- 备用模型需支持 JSON 输出；用 `--agent` 时还需支持 tools（工具调用）
+
 ## 界面
 
 ```powershell
