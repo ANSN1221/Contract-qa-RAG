@@ -215,17 +215,26 @@ class ContractAgent:
 
     # ---------- 主循环 ----------
 
-    def ask(self, question: str, top_k: int = 8) -> GraphResult:
+    def ask(
+        self, question: str, top_k: int = 8, history: list[dict] | None = None
+    ) -> GraphResult:
         started = time.perf_counter()
         self._seen = {}
         self._tool_log = []
         self._prompt_tokens = 0
         self._completion_tokens = 0
 
-        messages: list[dict] = [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"问题：{question}"},
-        ]
+        messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
+        # 带上最近两轮：让「那履约保证金呢」这类追问能落到具体对象上
+        for turn in (history or [])[-2:]:
+            past_question = str(turn.get("question", "")).strip()
+            past_answer = str(turn.get("answer", "")).strip().replace("\n", " ")
+            if not past_question:
+                continue
+            messages.append({"role": "user", "content": f"问题：{past_question}"})
+            if past_answer:
+                messages.append({"role": "assistant", "content": past_answer[:200]})
+        messages.append({"role": "user", "content": f"问题：{question}"})
         queries: list[str] = []
         error = ""
         rounds = 0

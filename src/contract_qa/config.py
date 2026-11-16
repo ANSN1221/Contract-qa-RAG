@@ -170,9 +170,9 @@ def _read_llm_providers() -> tuple[LLMProvider, ...]:
     providers: list[LLMProvider] = []
     primary = LLMProvider(
         name=os.environ.get("LLM_NAME", "primary"),
-        base_url=os.environ.get("LLM_BASE_URL", "https://api.deepseek.com/v1").rstrip("/"),
+        base_url=(os.environ.get("LLM_BASE_URL") or "https://api.deepseek.com/v1").rstrip("/"),
         api_key=os.environ.get("LLM_API_KEY", ""),
-        model=os.environ.get("LLM_MODEL", "deepseek-chat"),
+        model=os.environ.get("LLM_MODEL") or "deepseek-chat",
     )
     if primary.ready:
         providers.append(primary)
@@ -203,7 +203,7 @@ def get_settings() -> Settings:
     rerank_base = (os.environ.get("RERANK_BASE_URL", "") or embedding_base).rstrip("/")
     return Settings(
         llm_api_key=os.environ.get("LLM_API_KEY", ""),
-        llm_base_url=os.environ.get("LLM_BASE_URL", "https://api.deepseek.com/v1").rstrip("/"),
+        llm_base_url=(os.environ.get("LLM_BASE_URL") or "https://api.deepseek.com/v1").rstrip("/"),
         llm_model=os.environ.get("LLM_MODEL", "deepseek-chat"),
         embedding_api_key=embedding_key,
         embedding_base_url=embedding_base,

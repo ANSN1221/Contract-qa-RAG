@@ -103,6 +103,17 @@ class FailoverTest(unittest.TestCase):
         self.assertEqual(result.tool_calls[0].name, "search_clauses")
 
 
+def _clean_env(**extra) -> mock._patch:
+    """把配置读取会碰到的键全部清空，避免读到本机 .env 或其他测试的残留。"""
+    base = {"LLM_NAME": "", "LLM_BASE_URL": "", "LLM_API_KEY": "", "LLM_MODEL": ""}
+    for index in range(1, 6):
+        prefix = "LLM_FALLBACK" if index == 1 else f"LLM_FALLBACK_{index}"
+        for suffix in ("NAME", "BASE_URL", "API_KEY", "MODEL"):
+            base[f"{prefix}_{suffix}"] = ""
+    base.update(extra)
+    return mock.patch.dict(os.environ, base, clear=False)
+
+
 class ProviderConfigTest(unittest.TestCase):
     def test_reads_primary_and_two_backups(self):
         env = {
@@ -116,7 +127,7 @@ class ProviderConfigTest(unittest.TestCase):
             "LLM_FALLBACK_2_BASE_URL": "https://c.example/v1",
             "LLM_FALLBACK_2_NAME": "third",
         }
-        with mock.patch.dict(os.environ, env, clear=False):
+        with _clean_env(**env):
             providers = _read_llm_providers()
         self.assertEqual(len(providers), 3)
         self.assertEqual(providers[0].model, "m1")
@@ -128,12 +139,12 @@ class ProviderConfigTest(unittest.TestCase):
             "LLM_API_KEY": "k1",
             "LLM_FALLBACK_BASE_URL": "https://b.example/v1",  # 只有地址没密钥
         }
-        with mock.patch.dict(os.environ, env, clear=False):
+        with _clean_env(**env):
             providers = _read_llm_providers()
         self.assertEqual(len(providers), 1)
 
     def test_no_key_at_all_returns_empty(self):
-        with mock.patch.dict(os.environ, {"LLM_API_KEY": ""}, clear=False):
+        with _clean_env():
             providers = _read_llm_providers()
         self.assertEqual(providers, ())
 

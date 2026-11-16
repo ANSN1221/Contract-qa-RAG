@@ -56,6 +56,8 @@ class QAState(TypedDict, total=False):
     verify_problems: list[str]
     verify_feedback: str
     verify_error: str
+    # 多轮对话：此前若干轮的问答，用于把「那…呢」改写成立独立查询
+    history: list[dict]
 
 
 ROUTE_PROMPT = """判断用户问题是否需要查阅合同条款才能回答。
@@ -79,6 +81,30 @@ REWRITE_PROMPT = """把用户问题改写成适合条款检索的查询。
 3. 不要臆造原文里没有的术语，也不要回答问题。
 4. 只输出 JSON：{"queries": ["查询1", "查询2"]}
 """
+
+# 只有多轮对话时才追加：让追问里的指代落回具体对象，否则检索会跑偏
+REWRITE_HISTORY_HINT = """
+5. 这是多轮对话。把「那…呢」「这个」「它」「上面说的」等指代，替换成对话历史里的具体对象，
+   让每条查询单独拿出来也能检索。例：历史上文问投标保证金，当前问「那履约保证金呢」，
+   改写为「履约保证金 缴纳期限」。
+6. 只改写当前问题，不要把历史问题一起列出。
+"""
+
+
+def history_text(history: list[dict] | None, limit: int = 2) -> str:
+    """把最近几轮问答拼成提示用的纯文本，答案截断避免占满上下文。"""
+    if not history:
+        return ""
+    lines: list[str] = []
+    for turn in history[-limit:]:
+        question = str(turn.get("question", "")).strip()
+        answer = str(turn.get("answer", "")).strip().replace("\n", " ")
+        if not question:
+            continue
+        lines.append(f"问：{question}")
+        if answer:
+            lines.append(f"答：{answer[:120]}")
+    return "\n".join(lines)
 
 GENERATE_PROMPT = """你是合同审查助手。只能依据给定的条款片段回答问题。
 
@@ -240,11 +266,18 @@ class QAGraph:
 
     def _rewrite(self, state: QAState) -> QAState:
         started = time.perf_counter()
+        past = history_text(state.get("history"))
+        system_prompt = REWRITE_PROMPT + (REWRITE_HISTORY_HINT if past else "")
+        user_content = (
+            f"对话历史：\n{past}\n\n当前问题：{state['question']}"
+            if past
+            else state["question"]
+        )
         try:
             result = chat(
                 [
-                    {"role": "system", "content": REWRITE_PROMPT},
-                    {"role": "user", "content": state["question"]},
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_content},
                 ],
                 self.settings,
                 json_mode=True,
@@ -317,7 +350,13 @@ class QAGraph:
             return {"answer": "未检索到相关条款。", "answerable": False, "citation_ids": []}
 
         candidates = self._format_candidates(hits)
-        user_content = f"条款片段：\n\n{candidates}\n\n问题：{state['question']}"
+        past = history_text(state.get("history"))
+        blocks: list[str] = []
+        if past:
+            blocks.append(f"此前的问答（仅用于理解「那…」「它」指什么，不要复述）：\n{past}")
+        blocks.append(f"条款片段：\n\n{candidates}")
+        blocks.append(f"问题：{state['question']}")
+        user_content = "\n\n".join(blocks)
         feedback = state.get("verify_feedback", "")
         if feedback:
             # 回退重生成时把上一轮的不通过原因带上，否则模型只会重复同样的答案
@@ -518,8 +557,12 @@ class QAGraph:
 
     # ---------- 对外 ----------
 
-    def ask(self, question: str, top_k: int = 8) -> GraphResult:
-        state = self.app.invoke({"question": question, "top_k": top_k})
+    def ask(
+        self, question: str, top_k: int = 8, history: list[dict] | None = None
+    ) -> GraphResult:
+        state = self.app.invoke(
+            {"question": question, "top_k": top_k, "history": history or []}
+        )
         hits = self._hits_from_state(state)
         citations, violations = map_citations(state.get("citation_ids", []), hits)
 
