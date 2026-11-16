@@ -1,50 +1,100 @@
-{"id":"Q01","question":"设备总价款里包括哪些费用？","relevant_clause_ids":["DOC002-C0002"],"category":"fact"}
-{"id":"Q02","question":"设备出故障报修，维修人员多久要到现场？","relevant_clause_ids":["DOC002-C0007-1"],"category":"fact"}
-{"id":"Q03","question":"食品安全抽检的样品要在多少个工作日内检完？","relevant_clause_ids":["DOC008-C0029-1"],"category":"fact"}
-{"id":"Q04","question":"合同签订后要在多少个工作日内完成供货安装？","relevant_clause_ids":["DOC002-C0004"],"category":"fact"}
-{"id":"Q05","question":"测评服务的合同期限到哪一天？","relevant_clause_ids":["DOC004-C0006"],"category":"fact"}
-{"id":"Q06","question":"货款是分几次结清的，每次付多少比例？","relevant_clause_ids":["DOC002-C0006","DOC004-C0007-1"],"category":"cross"}
-{"id":"Q07","question":"乙方违约要按什么比例赔？","relevant_clause_ids":["DOC002-C0009-1","DOC004-C0011-1","DOC009-C0032"],"category":"cross"}
-{"id":"Q08","question":"几个监理项目的服务期限各是多少天？","relevant_clause_ids":["DOC010-C0001-3","DOC012-C0001-3","DOC014-C0001-3"],"category":"cross"}
-{"id":"Q09","question":"地质大数据平台项目的预算和最高限价是多少？","relevant_clause_ids":["DOC003-C0003-1","DOC003-C0011-1","DOC003-C0011-2"],"category":"cross"}
-{"id":"Q10","question":"合同一共要签几份？","relevant_clause_ids":["DOC002-C0014","DOC009-C0036"],"category":"cross"}
-{"id":"Q11","question":"这份合同编号是多少？","relevant_clause_ids":[],"category":"unanswerable"}
+{"id": "Q01", "question": "设备总价款里包括哪些费用？", "relevant_clause_ids": ["DOC002-C0002"], "category": "fact"}
+{"id": "Q02", "question": "设备出故障报修，维修人员多久要到现场？", "relevant_clause_ids": ["DOC002-C0007-1"], "category": "fact"}
+{"id": "Q03", "question": "食品安全抽检的样品要在多少个工作日内检完？", "relevant_clause_ids": ["DOC008-C0029-1"], "category": "fact"}
+{"id": "Q04", "question": "合同签订后要在多少个工作日内完成供货安装？", "relevant_clause_ids": ["DOC002-C0004"], "category": "fact"}
+{"id": "Q05", "question": "测评服务的合同期限到哪一天？", "relevant_clause_ids": ["DOC004-C0006"], "category": "fact"}
+{"id": "Q06", "question": "货款是分几次结清的，每次付多少比例？", "relevant_clause_ids": ["DOC002-C0006", "DOC004-C0007-1"], "category": "cross"}
+{"id": "Q07", "question": "乙方违约要按什么比例赔？", "relevant_clause_ids": ["DOC002-C0009-1", "DOC004-C0011-1", "DOC009-C0032"], "category": "cross"}
+{"id": "Q08", "question": "几个监理项目的服务期限各是多少天？", "relevant_clause_ids": ["DOC010-C0001-3", "DOC012-C0001-3", "DOC014-C0001-3"], "category": "cross"}
+{"id": "Q09", "question": "地质大数据平台项目的预算和最高限价是多少？", "relevant_clause_ids": ["DOC003-C0003-1", "DOC003-C0011-1", "DOC003-C0011-2"], "category": "cross"}
+{"id": "Q10", "question": "合同一共要签几份？", "relevant_clause_ids": ["DOC002-C0014", "DOC009-C0036"], "category": "cross"}
+{"id": "Q11", "question": "这份合同编号是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
 {"id": "Q12", "question": "合同签订日期是哪天？", "relevant_clause_ids": ["DOC012-C0007-5", "DOC014-C0007"], "category": "fact"}
-{"id":"Q13","question":"项目负责人的手机号是多少？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q14","question":"代理机构反腐倡廉监督电话是多少？","relevant_clause_ids":["DOC003-C0011-5"],"category":"fact"}
-{"id":"Q15","question":"工程量清单包含哪些分项？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q16","question":"验收的时候发现货物和合同对不上，甲方要在几天内提书面异议？","relevant_clause_ids":["DOC009-C0030"],"category":"fact"}
-{"id":"Q17","question":"测评开始前，乙方要提前几天通知甲方备份系统数据？","relevant_clause_ids":["DOC004-C0004-1"],"category":"fact"}
-{"id":"Q18","question":"平谷那个地质灾害防治工程有多少处隐患点要治理？","relevant_clause_ids":["DOC012-C0001-1"],"category":"fact"}
-{"id":"Q19","question":"怀柔项目的监理计划从哪天开始？","relevant_clause_ids":["DOC014-C0001-3"],"category":"fact"}
-{"id":"Q20","question":"地质大数据平台项目的评标委员会是几个人？","relevant_clause_ids":["DOC003-C0011-4"],"category":"fact"}
-{"id":"Q21","question":"潢川粮油项目一包的预算和最高限价是多少？","relevant_clause_ids":["DOC009-C0013-1","DOC009-C0021-1"],"category":"cross"}
-{"id":"Q22","question":"疫苗采购合同要履行多久？","relevant_clause_ids":["DOC005-C0002-4","DOC005-C0015-1"],"category":"cross"}
-{"id":"Q23","question":"指挥中心运维项目各个包的服务期限分别是几个月？","relevant_clause_ids":["DOC011-C0003-2","DOC011-C0011-1","DOC011-C0011-2"],"category":"cross"}
-{"id":"Q24","question":"疫苗项目投标要交保证金吗？","relevant_clause_ids":["DOC005-C0009-6","DOC005-C0012-5"],"category":"cross"}
+{"id": "Q13", "question": "项目负责人的手机号是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q14", "question": "代理机构反腐倡廉监督电话是多少？", "relevant_clause_ids": ["DOC003-C0011-5"], "category": "fact"}
+{"id": "Q15", "question": "工程量清单包含哪些分项？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q16", "question": "验收的时候发现货物和合同对不上，甲方要在几天内提书面异议？", "relevant_clause_ids": ["DOC009-C0030"], "category": "fact"}
+{"id": "Q17", "question": "测评开始前，乙方要提前几天通知甲方备份系统数据？", "relevant_clause_ids": ["DOC004-C0004-1"], "category": "fact"}
+{"id": "Q18", "question": "平谷那个地质灾害防治工程有多少处隐患点要治理？", "relevant_clause_ids": ["DOC012-C0001-1"], "category": "fact"}
+{"id": "Q19", "question": "怀柔项目的监理计划从哪天开始？", "relevant_clause_ids": ["DOC014-C0001-3"], "category": "fact"}
+{"id": "Q20", "question": "地质大数据平台项目的评标委员会是几个人？", "relevant_clause_ids": ["DOC003-C0011-4"], "category": "fact"}
+{"id": "Q21", "question": "潢川粮油项目一包的预算和最高限价是多少？", "relevant_clause_ids": ["DOC009-C0013-1", "DOC009-C0021-1"], "category": "cross"}
+{"id": "Q22", "question": "疫苗采购合同要履行多久？", "relevant_clause_ids": ["DOC005-C0002-4", "DOC005-C0015-1"], "category": "cross"}
+{"id": "Q23", "question": "指挥中心运维项目各个包的服务期限分别是几个月？", "relevant_clause_ids": ["DOC011-C0003-2", "DOC011-C0011-1", "DOC011-C0011-2"], "category": "cross"}
+{"id": "Q24", "question": "疫苗项目投标要交保证金吗？", "relevant_clause_ids": ["DOC005-C0009-6", "DOC005-C0012-5"], "category": "cross"}
 {"id": "Q25", "question": "OA 和信创终端的运维服务到什么时候结束？", "relevant_clause_ids": ["DOC011-C0022-1", "DOC011-C0023"], "category": "cross"}
-{"id":"Q26","question":"这个项目什么时候通过验收的？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q27","question":"中标通知书是哪天发出来的？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q28","question":"评标专家都有谁？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q29","question":"中标供应商的统一社会信用代码是多少？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q30","question":"这个项目哪天开工？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q31","question":"履约保证金要在拿到成交通知书后几天内交？","relevant_clause_ids":["DOC002-C0012"],"category":"fact"}
-{"id":"Q32","question":"这个平台的硬件设备出故障，乙方多长时间内要响应？","relevant_clause_ids":["DOC003-C0044"],"category":"fact"}
-{"id":"Q33","question":"因为变更增加的工作量在多少以内，合同价不变？","relevant_clause_ids":["DOC003-C0037"],"category":"fact"}
-{"id":"Q34","question":"潢川那个项目一包的农药，一亩地用多少？","relevant_clause_ids":["DOC009-C0037"],"category":"fact"}
-{"id":"Q35","question":"指挥中心运维项目里，紧急故障多久要响应？","relevant_clause_ids":["DOC011-C0025-2"],"category":"fact"}
-{"id":"Q36","question":"售后技术支持的响应时间最长不能超过多久？","relevant_clause_ids":["DOC011-C0031-15"],"category":"fact"}
-{"id":"Q37","question":"网络监测预警设备的原厂维保从哪天开始？","relevant_clause_ids":["DOC011-C0027","DOC011-C0024"],"category":"fact"}
-{"id":"Q38","question":"门头沟那个项目涉及几条公路、多少处隐患点？","relevant_clause_ids":["DOC010-C0001-1","DOC010-C0008"],"category":"cross"}
-{"id":"Q39","question":"监理合同的缺陷责任期是多长时间？","relevant_clause_ids":["DOC010-C0001-3","DOC012-C0001-3","DOC014-C0001-3"],"category":"cross"}
-{"id":"Q40","question":"监理项目要按什么比例配安全员？","relevant_clause_ids":["DOC012-C0007-3","DOC014-C0001-6"],"category":"cross"}
-{"id":"Q41","question":"疫苗项目和信阳抽检项目各分几个包？","relevant_clause_ids":["DOC005-C0002-3","DOC005-C0013","DOC008-C0013-2"],"category":"cross"}
-{"id":"Q42","question":"几个监理项目的总监理工程师分别是谁？","relevant_clause_ids":["DOC010-C0001-2","DOC012-C0001-2","DOC014-C0001-2"],"category":"cross"}
-{"id":"Q43","question":"廉政合同从什么时候开始生效？","relevant_clause_ids":["DOC010-C0006","DOC012-C0006","DOC014-C0006"],"category":"cross"}
-{"id":"Q44","question":"投标还需要另外交纸质文件吗？","relevant_clause_ids":["DOC008-C0008","DOC009-C0008"],"category":"cross"}
-{"id":"Q45","question":"中标供应商的注册资本是多少？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q46","question":"这个项目的环境影响评价批复文号是多少？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q47","question":"疫苗的接种剂量是多少？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q48","question":"农民工工资保证金要交多少？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q49","question":"计划竣工日期是哪天？","relevant_clause_ids":[],"category":"unanswerable"}
-{"id":"Q50","question":"中标供应商的注册地址是哪里？","relevant_clause_ids":[],"category":"unanswerable"}
+{"id": "Q26", "question": "这个项目什么时候通过验收的？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q27", "question": "中标通知书是哪天发出来的？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q28", "question": "评标专家都有谁？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q29", "question": "中标供应商的统一社会信用代码是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q30", "question": "这个项目哪天开工？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q31", "question": "履约保证金要在拿到成交通知书后几天内交？", "relevant_clause_ids": ["DOC002-C0012"], "category": "fact"}
+{"id": "Q32", "question": "这个平台的硬件设备出故障，乙方多长时间内要响应？", "relevant_clause_ids": ["DOC003-C0044"], "category": "fact"}
+{"id": "Q33", "question": "因为变更增加的工作量在多少以内，合同价不变？", "relevant_clause_ids": ["DOC003-C0037"], "category": "fact"}
+{"id": "Q34", "question": "潢川那个项目一包的农药，一亩地用多少？", "relevant_clause_ids": ["DOC009-C0037"], "category": "fact"}
+{"id": "Q35", "question": "指挥中心运维项目里，紧急故障多久要响应？", "relevant_clause_ids": ["DOC011-C0025-2"], "category": "fact"}
+{"id": "Q36", "question": "售后技术支持的响应时间最长不能超过多久？", "relevant_clause_ids": ["DOC011-C0031-15"], "category": "fact"}
+{"id": "Q37", "question": "网络监测预警设备的原厂维保从哪天开始？", "relevant_clause_ids": ["DOC011-C0027", "DOC011-C0024"], "category": "fact"}
+{"id": "Q38", "question": "门头沟那个项目涉及几条公路、多少处隐患点？", "relevant_clause_ids": ["DOC010-C0001-1", "DOC010-C0008"], "category": "cross"}
+{"id": "Q39", "question": "监理合同的缺陷责任期是多长时间？", "relevant_clause_ids": ["DOC010-C0001-3", "DOC012-C0001-3", "DOC014-C0001-3"], "category": "cross"}
+{"id": "Q40", "question": "监理项目要按什么比例配安全员？", "relevant_clause_ids": ["DOC012-C0007-3", "DOC014-C0001-6"], "category": "cross"}
+{"id": "Q41", "question": "疫苗项目和信阳抽检项目各分几个包？", "relevant_clause_ids": ["DOC005-C0002-3", "DOC005-C0013", "DOC008-C0013-2"], "category": "cross"}
+{"id": "Q42", "question": "几个监理项目的总监理工程师分别是谁？", "relevant_clause_ids": ["DOC010-C0001-2", "DOC012-C0001-2", "DOC014-C0001-2"], "category": "cross"}
+{"id": "Q43", "question": "廉政合同从什么时候开始生效？", "relevant_clause_ids": ["DOC010-C0006", "DOC012-C0006", "DOC014-C0006"], "category": "cross"}
+{"id": "Q44", "question": "投标还需要另外交纸质文件吗？", "relevant_clause_ids": ["DOC008-C0008", "DOC009-C0008"], "category": "cross"}
+{"id": "Q45", "question": "中标供应商的注册资本是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q46", "question": "这个项目的环境影响评价批复文号是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q47", "question": "疫苗的接种剂量是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q48", "question": "农民工工资保证金要交多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q49", "question": "计划竣工日期是哪天？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q50", "question": "中标供应商的注册地址是哪里？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q51", "question": "设备采购合同的总价是多少？", "relevant_clause_ids": ["DOC002-C0001", "DOC002-C0002"], "category": "fact"}
+{"id": "Q52", "question": "设备验收合格后能拿到多少比例的货款？", "relevant_clause_ids": ["DOC002-C0006"], "category": "fact"}
+{"id": "Q53", "question": "设备质保期是多长时间？", "relevant_clause_ids": ["DOC002-C0006"], "category": "fact"}
+{"id": "Q54", "question": "设备使用多久无质量问题后，货款能付到95%？", "relevant_clause_ids": ["DOC002-C0006"], "category": "fact"}
+{"id": "Q55", "question": "地质大数据平台项目是公开招标还是竞争性磋商？", "relevant_clause_ids": ["DOC003-C0003-1"], "category": "fact"}
+{"id": "Q56", "question": "地质大数据平台的质保期是几年？", "relevant_clause_ids": ["DOC003-C0003-1", "DOC003-C0015-22"], "category": "fact"}
+{"id": "Q57", "question": "地质大数据平台项目的招标编号是多少？", "relevant_clause_ids": ["DOC003-C0003-1"], "category": "fact"}
+{"id": "Q58", "question": "地质大数据平台项目接受联合体投标吗？", "relevant_clause_ids": ["DOC003-C0003-2", "DOC011-C0011-16"], "category": "fact"}
+{"id": "Q59", "question": "地质大数据平台的投标文件要在什么时候前递交？", "relevant_clause_ids": ["DOC003-C0006", "DOC003-C0002"], "category": "fact"}
+{"id": "Q60", "question": "密码测评服务合同的甲方是哪家单位？", "relevant_clause_ids": ["DOC004-C0001"], "category": "fact"}
+{"id": "Q61", "question": "密码测评服务要持续到哪一天？", "relevant_clause_ids": ["DOC004-C0006"], "category": "fact"}
+{"id": "Q62", "question": "密码测评合同的总价是多少？", "relevant_clause_ids": ["DOC004-C0007-1"], "category": "fact"}
+{"id": "Q63", "question": "疫苗项目的交货期是多少天？", "relevant_clause_ids": ["DOC005-C0002-3"], "category": "fact"}
+{"id": "Q64", "question": "信阳食品安全抽检项目一共抽多少批食用农产品？", "relevant_clause_ids": ["DOC008-C0040-1"], "category": "fact"}
+{"id": "Q65", "question": "潢川粮油项目的预算是多少？", "relevant_clause_ids": ["DOC009-C0013-1"], "category": "fact"}
+{"id": "Q66", "question": "潢川粮油项目的中标人要多久内完成供货？", "relevant_clause_ids": ["DOC009-C0021-1"], "category": "fact"}
+{"id": "Q67", "question": "潢川粮油项目的投标有效期是多久？", "relevant_clause_ids": ["DOC009-C0041-1"], "category": "fact"}
+{"id": "Q68", "question": "交通厅运维系统要支持多少个部门的正常使用？", "relevant_clause_ids": ["DOC011-C0022-4"], "category": "fact"}
+{"id": "Q69", "question": "平谷监理项目的签约合同价是多少？", "relevant_clause_ids": ["DOC012-C0001-2"], "category": "fact"}
+{"id": "Q70", "question": "平谷监理项目的计划开始监理日期是哪天？", "relevant_clause_ids": ["DOC012-C0001-3"], "category": "fact"}
+{"id": "Q71", "question": "信阳食品安全抽检项目的预算是多少？", "relevant_clause_ids": ["DOC008-C0013-1"], "category": "fact"}
+{"id": "Q72", "question": "信阳抽检项目里，各包分别抽检多少批？", "relevant_clause_ids": ["DOC008-C0040-1"], "category": "cross"}
+{"id": "Q73", "question": "几个监理项目里，签约合同价分别是多少？", "relevant_clause_ids": ["DOC010-C0001-2", "DOC012-C0001-2", "DOC014-C0001-2"], "category": "cross"}
+{"id": "Q74", "question": "几个监理项目的委托人分别是哪个分局？", "relevant_clause_ids": ["DOC010-C0001-4", "DOC012-C0001-4", "DOC014-C0001-4"], "category": "cross"}
+{"id": "Q75", "question": "设备采购的付款分几个阶段，各阶段比例是多少？", "relevant_clause_ids": ["DOC002-C0006"], "category": "cross"}
+{"id": "Q76", "question": "地质大数据平台的预算、最高限价和质保期分别是多少？", "relevant_clause_ids": ["DOC003-C0003-1", "DOC003-C0011-1"], "category": "cross"}
+{"id": "Q77", "question": "密码测评的付款分几次，每次多少？", "relevant_clause_ids": ["DOC004-C0007-1"], "category": "cross"}
+{"id": "Q78", "question": "交通厅运维项目包1和包2分别服务什么内容？", "relevant_clause_ids": ["DOC011-C0021", "DOC011-C0022-1", "DOC011-C0003-2", "DOC011-C0011-1"], "category": "cross"}
+{"id": "Q79", "question": "潢川粮油项目的预算和交货期分别是多少？", "relevant_clause_ids": ["DOC009-C0013-1", "DOC009-C0021-1"], "category": "cross"}
+{"id": "Q80", "question": "设备采购的质保期和履约保证金缴纳期限分别是多久？", "relevant_clause_ids": ["DOC002-C0006", "DOC002-C0012"], "category": "cross"}
+{"id": "Q81", "question": "几个监理项目的服务期限分别是多少日历天？", "relevant_clause_ids": ["DOC010-C0001-3", "DOC012-C0001-3", "DOC014-C0001-3"], "category": "cross"}
+{"id": "Q82", "question": "信阳抽检项目各包的总批次加起来是多少？", "relevant_clause_ids": ["DOC008-C0040-1"], "category": "cross"}
+{"id": "Q83", "question": "疫苗项目的交货期和投标有效期分别是多久？", "relevant_clause_ids": ["DOC005-C0002-3", "DOC005-C0009-6", "DOC005-C0015-1", "DOC005-C0009-2", "DOC005-C0023-1"], "category": "cross"}
+{"id": "Q84", "question": "地质大数据平台的招标编号和投标截止时间分别是多少？", "relevant_clause_ids": ["DOC003-C0003-1", "DOC003-C0006"], "category": "cross"}
+{"id": "Q85", "question": "交通厅运维的工期和投标有效期分别是多久？", "relevant_clause_ids": ["DOC011-C0022-4", "DOC011-C0011-4"], "category": "cross"}
+{"id": "Q86", "question": "密码测评的甲方和合同总价分别是多少？", "relevant_clause_ids": ["DOC004-C0001", "DOC004-C0007-1"], "category": "cross"}
+{"id": "Q87", "question": "设备采购合同的乙方银行账号是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q88", "question": "地质大数据平台的中标人是谁？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q89", "question": "密码测评服务的项目经理叫什么名字？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q90", "question": "疫苗项目的生产厂家是哪家？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q91", "question": "信阳抽检项目的中标供应商地址在哪里？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q92", "question": "潢川粮油项目的农药单价是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q93", "question": "交通厅运维项目的维保工程师联系方式是什么？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q94", "question": "监理项目的监理工程师身份证号是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q95", "question": "这些项目一共涉及多少个政府部门？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q96", "question": "设备采购合同什么时候签的？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q97", "question": "地质大数据平台项目的验收报告编号是多少？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q98", "question": "密码测评报告一共有多少页？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q99", "question": "信阳抽检项目的采样人员名单？", "relevant_clause_ids": [], "category": "unanswerable"}
+{"id": "Q100", "question": "潢川项目的中标通知书扫描件在哪里？", "relevant_clause_ids": [], "category": "unanswerable"}
