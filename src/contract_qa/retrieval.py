@@ -16,6 +16,7 @@ from __future__ import annotations
 import gzip
 import json
 import warnings
+from collections.abc import Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -170,7 +171,13 @@ class Retriever:
         candidates: int = 50,
         *,
         use_rerank: bool | None = None,
+        doc_ids: Sequence[str] | None = None,
     ) -> list[Hit]:
+        """`doc_ids` 把召回限定在指定文档内。
+
+        多合同语料下这是必需的：用户问的是「这份合同的总价」，
+        跨文档召回会把别的合同条款混进来。
+        """
         if top_k <= 0:
             return []
         dense = self.dense_search(query, candidates)
@@ -188,6 +195,9 @@ class Retriever:
 
         # 先过滤失效编号再截断，避免结果不足 top_k
         pool = [cid for cid, _ in ordered if cid in self.records]
+        if doc_ids:
+            allowed = set(doc_ids)
+            pool = [cid for cid in pool if self.records[cid].doc_id in allowed]
         pool = pool[: max(self.settings.rerank_candidates, top_k)]
 
         rerank_scores: dict[str, float] = {}
